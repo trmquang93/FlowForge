@@ -71,6 +71,40 @@ export function Sidebar({ screen, screens, connections, onClose, onRename, onAdd
         </button>
       </div>
 
+      {/* Description (blank screens only) */}
+      {!screen.imageData && (
+        <div
+          style={{
+            padding: "10px 12px",
+            background: COLORS.bg,
+            borderRadius: 8,
+            marginBottom: 12,
+          }}
+        >
+          <div style={{
+            fontSize: 10,
+            color: COLORS.textMuted,
+            fontFamily: FONTS.mono,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            marginBottom: 6,
+          }}>
+            Description
+          </div>
+          <div style={{
+            fontSize: 11,
+            color: screen.description ? COLORS.textMuted : COLORS.textDim,
+            fontFamily: FONTS.mono,
+            fontStyle: screen.description ? "normal" : "italic",
+            lineHeight: 1.5,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          }}>
+            {screen.description || "No description added"}
+          </div>
+        </div>
+      )}
+
       {/* Hotspots list */}
       <h5
         style={{

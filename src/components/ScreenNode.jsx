@@ -6,8 +6,11 @@ export function ScreenNode({
   onDotDragStart, onConnectTarget, onHoverTarget, isConnectHoverTarget, isConnecting,
   selectedHotspotId, onHotspotMouseDown, onImageAreaMouseDown, onHotspotDragHandleMouseDown,
   onResizeHandleMouseDown, onScreenDimensions, drawRect, isHotspotDragging,
+  onUpdateDescription,
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [isEditingDesc, setIsEditingDesc] = useState(false);
+  const [draftDesc, setDraftDesc] = useState("");
   const imgRef = useRef(null);
 
   const borderColor = isConnectHoverTarget
@@ -27,6 +30,7 @@ export function ScreenNode({
         if (e.target.closest(".hotspot-area") || e.target.closest(".screen-btn")) return;
         if (e.target.closest(".connection-dot-right")) return;
         if (e.target.closest(".hotspot-drag-handle")) return;
+        if (e.target.closest(".description-area")) return;
         onSelect(screen.id);
         onDragStart(e, screen.id);
       }}
@@ -273,15 +277,149 @@ export function ScreenNode({
           </>
         ) : (
           <div
+            className="description-area"
             style={{
-              padding: 30,
+              padding: 16,
               textAlign: "center",
               color: COLORS.textDim,
               fontSize: 12,
               fontFamily: FONTS.mono,
+              minHeight: 88,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            Drop image or<br />click to upload
+            {isEditingDesc ? (
+              <div style={{ width: "100%", textAlign: "left" }}>
+                <textarea
+                  autoFocus
+                  maxLength={500}
+                  value={draftDesc}
+                  onChange={(e) => setDraftDesc(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                      const val = draftDesc.trim();
+                      onUpdateDescription?.(screen.id, val);
+                      setIsEditingDesc(false);
+                    }
+                    if (e.key === "Escape") {
+                      setIsEditingDesc(false);
+                    }
+                  }}
+                  onBlur={() => {
+                    const val = draftDesc.trim();
+                    onUpdateDescription?.(screen.id, val);
+                    setIsEditingDesc(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    minHeight: 60,
+                    background: "rgba(255,255,255,0.05)",
+                    border: `1px solid ${COLORS.accent}`,
+                    borderRadius: 6,
+                    color: COLORS.text,
+                    fontSize: 11,
+                    fontFamily: FONTS.mono,
+                    padding: 8,
+                    resize: "vertical",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                  placeholder="Describe this screen..."
+                />
+                <div style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginTop: 6,
+                }}>
+                  <span style={{ fontSize: 9, color: COLORS.textDim }}>
+                    {draftDesc.length}/500
+                  </span>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <button
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setIsEditingDesc(false);
+                      }}
+                      style={{
+                        background: "rgba(255,255,255,0.05)",
+                        border: `1px solid ${COLORS.border}`,
+                        borderRadius: 4,
+                        color: COLORS.textDim,
+                        fontSize: 10,
+                        padding: "2px 8px",
+                        cursor: "pointer",
+                        fontFamily: FONTS.mono,
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        const val = draftDesc.trim();
+                        onUpdateDescription?.(screen.id, val);
+                        setIsEditingDesc(false);
+                      }}
+                      style={{
+                        background: "rgba(108,92,231,0.2)",
+                        border: `1px solid rgba(108,92,231,0.4)`,
+                        borderRadius: 4,
+                        color: COLORS.accentLight,
+                        fontSize: 10,
+                        padding: "2px 8px",
+                        cursor: "pointer",
+                        fontFamily: FONTS.mono,
+                      }}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : screen.description ? (
+              <div
+                onClick={() => {
+                  setDraftDesc(screen.description);
+                  setIsEditingDesc(true);
+                }}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  color: COLORS.textMuted,
+                  fontSize: 11,
+                  lineHeight: 1.5,
+                  cursor: "text",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                }}
+                title="Click to edit description"
+              >
+                {screen.description}
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setDraftDesc("");
+                  setIsEditingDesc(true);
+                }}
+                style={{
+                  background: "rgba(108,92,231,0.1)",
+                  border: `1px dashed rgba(108,92,231,0.3)`,
+                  borderRadius: 8,
+                  color: COLORS.accentLight,
+                  fontSize: 11,
+                  padding: "8px 16px",
+                  cursor: "pointer",
+                  fontFamily: FONTS.mono,
+                }}
+              >
+                + Add Description
+              </button>
+            )}
           </div>
         )}
       </div>

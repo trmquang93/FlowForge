@@ -20,6 +20,7 @@ export function useScreenManager(pan, zoom) {
       y: (-pan.y + offsetY) / zoom,
       width: 220,
       imageData,
+      description: "",
       hotspots: [],
     };
     setScreens((prev) => [...prev, newScreen]);
@@ -36,6 +37,10 @@ export function useScreenManager(pan, zoom) {
 
   const renameScreen = useCallback((id, name) => {
     setScreens((prev) => prev.map((s) => (s.id === id ? { ...s, name } : s)));
+  }, []);
+
+  const updateScreenDescription = useCallback((id, description) => {
+    setScreens((prev) => prev.map((s) => (s.id === id ? { ...s, description } : s)));
   }, []);
 
   const moveScreen = useCallback((id, x, y) => {
@@ -205,6 +210,23 @@ export function useScreenManager(pan, zoom) {
     });
   }, []);
 
+  const addConnection = useCallback((fromScreenId, toScreenId) => {
+    setConnections((prev) => {
+      const exists = prev.some(
+        (c) => c.fromScreenId === fromScreenId && c.toScreenId === toScreenId && !c.hotspotId
+      );
+      if (exists) return prev;
+      return [...prev, {
+        id: generateId(),
+        fromScreenId,
+        toScreenId,
+        hotspotId: null,
+        label: "",
+        action: "navigate",
+      }];
+    });
+  }, []);
+
   const replaceAll = useCallback((newScreens, newConnections, newScreenCounter) => {
     setScreens(newScreens);
     setConnections(newConnections);
@@ -236,7 +258,9 @@ export function useScreenManager(pan, zoom) {
     moveHotspot,
     resizeHotspot,
     updateScreenDimensions,
+    updateScreenDescription,
     quickConnectHotspot,
+    addConnection,
     replaceAll,
     mergeAll,
   };

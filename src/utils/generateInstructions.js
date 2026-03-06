@@ -9,6 +9,7 @@ export function generateInstructions(screens, connections) {
     output += `### Screen ${i + 1}: "${s.name}"\n`;
     output += `  - ID: ${s.id}\n`;
     output += `  - Has Design Image: ${s.imageData ? "YES (refer to attached screen capture/wireframe)" : "NO — needs design"}\n`;
+    if (s.description) output += `  - Description: ${s.description}\n`;
     output += `  - Canvas Position: (${Math.round(s.x)}, ${Math.round(s.y)})\n`;
 
     if (s.hotspots.length > 0) {

@@ -25,7 +25,7 @@ export default function FlowForge() {
     fileInputRef, addScreen, removeScreen, renameScreen, moveScreen,
     handleImageUpload, onFileChange, handlePaste, handleCanvasDrop,
     saveHotspot, deleteHotspot, moveHotspot, resizeHotspot, updateScreenDimensions,
-    quickConnectHotspot, replaceAll, mergeAll,
+    updateScreenDescription, quickConnectHotspot, addConnection, replaceAll, mergeAll,
   } = useScreenManager(pan, zoom);
 
   const [hotspotModal, setHotspotModal] = useState(null);
@@ -88,10 +88,9 @@ export default function FlowForge() {
       cancelConnecting();
       return;
     }
-    const screen = screens.find((s) => s.id === connecting.fromScreenId);
-    setHotspotModal({ screen, hotspot: null, prefilledTarget: targetScreenId });
+    addConnection(connecting.fromScreenId, targetScreenId);
     cancelConnecting();
-  }, [connecting, screens, cancelConnecting, hotspotInteraction, quickConnectHotspot]);
+  }, [connecting, cancelConnecting, hotspotInteraction, quickConnectHotspot, addConnection]);
 
   // Hotspot mouse down: select or begin reposition
   const onHotspotMouseDown = useCallback((e, screenId, hotspotId) => {
@@ -584,6 +583,7 @@ export default function FlowForge() {
                 onScreenDimensions={onScreenDimensions}
                 drawRect={drawRect}
                 isHotspotDragging={isHotspotDragging}
+                onUpdateDescription={updateScreenDescription}
               />
             ))}
             <ConnectionLines

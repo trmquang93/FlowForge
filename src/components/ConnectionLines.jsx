@@ -3,6 +3,11 @@ import { COLORS, FONTS } from "../styles/theme";
 const HEADER_HEIGHT = 37;
 const BORDER = 2;
 
+function getScreenCenterY(screen) {
+  const imageAreaHeight = screen.imageHeight || 120;
+  return screen.y + (HEADER_HEIGHT + imageAreaHeight) / 2;
+}
+
 export function ConnectionLines({ screens, connections, previewLine, hotspotPreviewLine }) {
   return (
     <svg
@@ -44,10 +49,10 @@ export function ConnectionLines({ screens, connections, previewLine, hotspotPrev
           fromY = from.y + BORDER + HEADER_HEIGHT + (hs.y + hs.h / 2) / 100 * from.imageHeight;
         } else {
           fromX = from.x + screenW;
-          fromY = from.y + 100;
+          fromY = getScreenCenterY(from);
         }
         const toX = to.x;
-        const toY = to.y + 100;
+        const toY = getScreenCenterY(to);
 
         const dx = toX - fromX;
         const cp = Math.max(80, Math.abs(dx) * 0.4);
@@ -101,7 +106,7 @@ export function ConnectionLines({ screens, connections, previewLine, hotspotPrev
           fromY = from.y + BORDER + HEADER_HEIGHT + (hs.y + hs.h / 2) / 100 * from.imageHeight;
         } else {
           fromX = from.x + screenW;
-          fromY = from.y + 100;
+          fromY = getScreenCenterY(from);
         }
         const toX = hotspotPreviewLine.toX;
         const toY = hotspotPreviewLine.toY;
@@ -126,7 +131,7 @@ export function ConnectionLines({ screens, connections, previewLine, hotspotPrev
         const from = screens.find((s) => s.id === previewLine.fromScreenId);
         if (!from) return null;
         const fromX = from.x + (from.width || 220);
-        const fromY = from.y + 100;
+        const fromY = getScreenCenterY(from);
         const toX = previewLine.toX;
         const toY = previewLine.toY;
         const dx = toX - fromX;
