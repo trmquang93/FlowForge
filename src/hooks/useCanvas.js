@@ -53,7 +53,7 @@ export function useCanvas() {
 
   const handleWheel = useCallback((e) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.08 : 0.08;
+    const delta = e.deltaY > 0 ? -0.02 : 0.02;
     setZoom((z) => Math.max(0.2, Math.min(2, z + delta)));
   }, []);
 
