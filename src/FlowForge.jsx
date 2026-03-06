@@ -25,7 +25,8 @@ export default function FlowForge() {
     fileInputRef, addScreen, removeScreen, renameScreen, moveScreen,
     handleImageUpload, onFileChange, handlePaste, handleCanvasDrop,
     saveHotspot, deleteHotspot, moveHotspot, resizeHotspot, updateScreenDimensions,
-    updateScreenDescription, quickConnectHotspot, addConnection, replaceAll, mergeAll,
+    updateScreenDescription, quickConnectHotspot, updateConnection, deleteConnection,
+    addConnection, replaceAll, mergeAll,
   } = useScreenManager(pan, zoom);
 
   const [hotspotModal, setHotspotModal] = useState(null);
@@ -41,6 +42,9 @@ export default function FlowForge() {
 
   // Hotspot interaction state
   const [hotspotInteraction, setHotspotInteraction] = useState(null);
+
+  // Selected connection state
+  const [selectedConnection, setSelectedConnection] = useState(null);
 
   const cancelConnecting = useCallback(() => {
     setConnecting(null);
@@ -175,9 +179,44 @@ export default function FlowForge() {
     updateScreenDimensions(screenId, imageWidth, imageHeight);
   }, [updateScreenDimensions]);
 
+  // Connection line interaction callbacks
+  const onConnectionClick = useCallback((connId) => {
+    setSelectedConnection(connId);
+    setHotspotInteraction(null);
+  }, []);
+
+  const onConnectionDoubleClick = useCallback((connId) => {
+    const conn = connections.find((c) => c.id === connId);
+    if (!conn) return;
+    const screen = screens.find((s) => s.id === conn.fromScreenId);
+    if (!screen) return;
+    const hotspot = conn.hotspotId
+      ? screen.hotspots.find((h) => h.id === conn.hotspotId)
+      : null;
+    if (hotspot) {
+      setHotspotModal({ screen, hotspot });
+    }
+  }, [connections, screens]);
+
+  const onEndpointMouseDown = useCallback((e, connId, endpoint) => {
+    e.preventDefault();
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = (e.clientX - rect.left - pan.x) / zoom;
+    const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+    setHotspotInteraction({
+      mode: "conn-endpoint-drag",
+      connectionId: connId,
+      endpoint,
+      mouseX,
+      mouseY,
+    });
+  }, [canvasRef, pan, zoom]);
+
   const onCanvasMouseDown = useCallback((e) => {
+    // Clear selected connection on canvas click
+    if (selectedConnection) setSelectedConnection(null);
     // Cancel hotspot interaction on canvas click
-    if (hotspotInteraction && hotspotInteraction.mode !== "draw" && hotspotInteraction.mode !== "reposition" && hotspotInteraction.mode !== "hotspot-drag" && hotspotInteraction.mode !== "resize") {
+    if (hotspotInteraction && hotspotInteraction.mode !== "draw" && hotspotInteraction.mode !== "reposition" && hotspotInteraction.mode !== "hotspot-drag" && hotspotInteraction.mode !== "resize" && hotspotInteraction.mode !== "conn-endpoint-drag") {
       setHotspotInteraction(null);
     }
     if (connecting) {
@@ -186,12 +225,12 @@ export default function FlowForge() {
       }
       return;
     }
-    if (hotspotInteraction?.mode === "draw" || hotspotInteraction?.mode === "reposition" || hotspotInteraction?.mode === "hotspot-drag" || hotspotInteraction?.mode === "resize") {
+    if (hotspotInteraction?.mode === "draw" || hotspotInteraction?.mode === "reposition" || hotspotInteraction?.mode === "hotspot-drag" || hotspotInteraction?.mode === "resize" || hotspotInteraction?.mode === "conn-endpoint-drag") {
       return;
     }
     const wasPan = handleCanvasMouseDown(e);
     if (wasPan) setSelectedScreen(null);
-  }, [handleCanvasMouseDown, setSelectedScreen, connecting, cancelConnecting, hotspotInteraction]);
+  }, [handleCanvasMouseDown, setSelectedScreen, connecting, cancelConnecting, hotspotInteraction, selectedConnection]);
 
   const onCanvasMouseMove = useCallback((e) => {
     // Handle hotspot interactions
@@ -289,6 +328,14 @@ export default function FlowForge() {
       return;
     }
 
+    if (hotspotInteraction?.mode === "conn-endpoint-drag") {
+      const rect = canvasRef.current.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left - pan.x) / zoom;
+      const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+      setHotspotInteraction((prev) => ({ ...prev, mouseX, mouseY }));
+      return;
+    }
+
     if (hotspotInteraction?.mode === "hotspot-drag") {
       const rect = canvasRef.current.getBoundingClientRect();
       const mouseX = (e.clientX - rect.left - pan.x) / zoom;
@@ -311,6 +358,24 @@ export default function FlowForge() {
   }, [handleMouseMove, moveScreen, connecting, canvasRef, pan, zoom, hotspotInteraction, screens, moveHotspot, resizeHotspot]);
 
   const onCanvasMouseUp = useCallback((e) => {
+    // Handle connection endpoint drag completion
+    if (hotspotInteraction?.mode === "conn-endpoint-drag") {
+      const { connectionId, endpoint, mouseX, mouseY } = hotspotInteraction;
+      const hitScreen = screens.find((s) => {
+        const sw = s.width || 220;
+        const sh = (s.imageHeight || 120) + HEADER_HEIGHT;
+        return mouseX >= s.x && mouseX <= s.x + sw && mouseY >= s.y && mouseY <= s.y + sh;
+      });
+      if (hitScreen) {
+        const patch = endpoint === "from"
+          ? { fromScreenId: hitScreen.id }
+          : { toScreenId: hitScreen.id };
+        updateConnection(connectionId, patch);
+      }
+      setHotspotInteraction(null);
+      return;
+    }
+
     // Handle draw completion
     if (hotspotInteraction?.mode === "draw") {
       const dr = hotspotInteraction.drawRect;
@@ -364,9 +429,13 @@ export default function FlowForge() {
       return;
     }
     handleMouseUp(e);
-  }, [connecting, cancelConnecting, handleMouseUp, hotspotInteraction, screens]);
+  }, [connecting, cancelConnecting, handleMouseUp, hotspotInteraction, screens, updateConnection]);
 
   const onCanvasMouseLeave = useCallback((e) => {
+    if (hotspotInteraction?.mode === "conn-endpoint-drag") {
+      setHotspotInteraction(null);
+      return;
+    }
     if (hotspotInteraction?.mode === "draw" || hotspotInteraction?.mode === "reposition" || hotspotInteraction?.mode === "resize") {
       setHotspotInteraction({
         mode: "selected",
@@ -453,17 +522,32 @@ export default function FlowForge() {
     setShowInstructions(true);
   }, [screens, connections]);
 
-  // Escape key cancels connecting and hotspot interactions
+  // Keyboard shortcuts: Escape cancels, Delete/Backspace removes selected connection
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === "Escape") {
+        if (hotspotInteraction?.mode === "conn-endpoint-drag") {
+          setHotspotInteraction(null);
+          return;
+        }
         if (connecting) cancelConnecting();
         if (hotspotInteraction) cancelHotspotInteraction();
+        if (selectedConnection) setSelectedConnection(null);
+      }
+      if (e.key === "Delete" || e.key === "Backspace") {
+        const tag = document.activeElement?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if (hotspotModal || renameModal || importConfirm || showInstructions) return;
+        if (selectedConnection) {
+          e.preventDefault();
+          deleteConnection(selectedConnection);
+          setSelectedConnection(null);
+        }
       }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [connecting, cancelConnecting, hotspotInteraction, cancelHotspotInteraction]);
+  }, [connecting, cancelConnecting, hotspotInteraction, cancelHotspotInteraction, selectedConnection, deleteConnection, hotspotModal, renameModal, importConfirm, showInstructions]);
 
   useEffect(() => {
     const onPaste = (e) => {
@@ -492,8 +576,18 @@ export default function FlowForge() {
 
   const isHotspotDragging = hotspotInteraction?.mode === "hotspot-drag";
 
+  const endpointDragPreview = hotspotInteraction?.mode === "conn-endpoint-drag"
+    ? {
+        connectionId: hotspotInteraction.connectionId,
+        endpoint: hotspotInteraction.endpoint,
+        mouseX: hotspotInteraction.mouseX,
+        mouseY: hotspotInteraction.mouseY,
+      }
+    : null;
+
   const resizeCursors = { nw: "nwse-resize", n: "ns-resize", ne: "nesw-resize", e: "ew-resize", se: "nwse-resize", s: "ns-resize", sw: "nesw-resize", w: "ew-resize" };
-  const canvasCursor = connecting || isHotspotDragging
+  const isEndpointDragging = hotspotInteraction?.mode === "conn-endpoint-drag";
+  const canvasCursor = connecting || isHotspotDragging || isEndpointDragging
     ? "crosshair"
     : hotspotInteraction?.mode === "draw"
       ? "crosshair"
@@ -591,6 +685,11 @@ export default function FlowForge() {
               connections={connections}
               previewLine={previewLine}
               hotspotPreviewLine={hotspotPreviewLine}
+              selectedConnectionId={selectedConnection}
+              onConnectionClick={onConnectionClick}
+              onConnectionDoubleClick={onConnectionDoubleClick}
+              onEndpointMouseDown={onEndpointMouseDown}
+              endpointDragPreview={endpointDragPreview}
             />
           </div>
 

@@ -8,7 +8,48 @@ function getScreenCenterY(screen) {
   return screen.y + (HEADER_HEIGHT + imageAreaHeight) / 2;
 }
 
-export function ConnectionLines({ screens, connections, previewLine, hotspotPreviewLine }) {
+function computePoints(conn, screens) {
+  const from = screens.find((s) => s.id === conn.fromScreenId);
+  const to = screens.find((s) => s.id === conn.toScreenId);
+  if (!from || !to) return null;
+
+  const screenW = from.width || 220;
+  const hs = conn.hotspotId && from.hotspots
+    ? from.hotspots.find((h) => h.id === conn.hotspotId)
+    : null;
+
+  let fromX, fromY;
+  if (hs && from.imageHeight) {
+    fromX = from.x + BORDER + (hs.x + hs.w / 2) / 100 * screenW;
+    fromY = from.y + BORDER + HEADER_HEIGHT + (hs.y + hs.h / 2) / 100 * from.imageHeight;
+  } else {
+    fromX = from.x + screenW;
+    fromY = getScreenCenterY(from);
+  }
+  const toX = to.x;
+  const toY = getScreenCenterY(to);
+
+  const dx = toX - fromX;
+  const cp = Math.max(80, Math.abs(dx) * 0.4);
+
+  return { fromX, fromY, toX, toY, cp };
+}
+
+function bezierD(fromX, fromY, toX, toY, cp) {
+  return `M ${fromX} ${fromY} C ${fromX + cp} ${fromY}, ${toX - cp} ${toY}, ${toX} ${toY}`;
+}
+
+export function ConnectionLines({
+  screens,
+  connections,
+  previewLine,
+  hotspotPreviewLine,
+  selectedConnectionId,
+  onConnectionClick,
+  onConnectionDoubleClick,
+  onEndpointMouseDown,
+  endpointDragPreview,
+}) {
   return (
     <svg
       style={{
@@ -25,6 +66,9 @@ export function ConnectionLines({ screens, connections, previewLine, hotspotPrev
         <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
           <polygon points="0 0, 10 3.5, 0 7" fill={COLORS.connectionLine} />
         </marker>
+        <marker id="arrowhead-selected" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill={COLORS.accentLight} />
+        </marker>
         <filter id="glow">
           <feGaussianBlur stdDeviation="3" result="coloredBlur" />
           <feMerge>
@@ -32,51 +76,70 @@ export function ConnectionLines({ screens, connections, previewLine, hotspotPrev
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+        <filter id="glow-strong">
+          <feGaussianBlur stdDeviation="5" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
       {connections.map((conn) => {
-        const from = screens.find((s) => s.id === conn.fromScreenId);
-        const to = screens.find((s) => s.id === conn.toScreenId);
-        if (!from || !to) return null;
+        const pts = computePoints(conn, screens);
+        if (!pts) return null;
 
-        const screenW = from.width || 220;
-        const hs = conn.hotspotId && from.hotspots
-          ? from.hotspots.find((h) => h.id === conn.hotspotId)
-          : null;
+        let { fromX, fromY, toX, toY, cp } = pts;
+        const isSelected = conn.id === selectedConnectionId;
 
-        let fromX, fromY;
-        if (hs && from.imageHeight) {
-          fromX = from.x + BORDER + (hs.x + hs.w / 2) / 100 * screenW;
-          fromY = from.y + BORDER + HEADER_HEIGHT + (hs.y + hs.h / 2) / 100 * from.imageHeight;
-        } else {
-          fromX = from.x + screenW;
-          fromY = getScreenCenterY(from);
+        // Apply endpoint drag preview overrides
+        if (endpointDragPreview && endpointDragPreview.connectionId === conn.id) {
+          if (endpointDragPreview.endpoint === "from") {
+            fromX = endpointDragPreview.mouseX;
+            fromY = endpointDragPreview.mouseY;
+          } else {
+            toX = endpointDragPreview.mouseX;
+            toY = endpointDragPreview.mouseY;
+          }
+          const dx = toX - fromX;
+          cp = Math.max(80, Math.abs(dx) * 0.4);
         }
-        const toX = to.x;
-        const toY = getScreenCenterY(to);
 
-        const dx = toX - fromX;
-        const cp = Math.max(80, Math.abs(dx) * 0.4);
+        const d = bezierD(fromX, fromY, toX, toY, cp);
 
         return (
           <g key={conn.id}>
+            {/* Transparent wide hit area for click interaction */}
+            <path
+              d={d}
+              fill="none"
+              stroke="transparent"
+              strokeWidth={12}
+              pointerEvents="stroke"
+              cursor="pointer"
+              onClick={(e) => { e.stopPropagation(); onConnectionClick?.(conn.id); }}
+              onDoubleClick={(e) => { e.stopPropagation(); onConnectionDoubleClick?.(conn.id); }}
+            />
+            {/* Origin dot */}
             <circle
               cx={fromX}
               cy={fromY}
-              r={5}
-              fill={COLORS.connectionLine}
-              filter="url(#glow)"
-              opacity={0.9}
+              r={isSelected ? 6 : 5}
+              fill={isSelected ? COLORS.accentLight : COLORS.connectionLine}
+              filter={isSelected ? "url(#glow-strong)" : "url(#glow)"}
+              opacity={isSelected ? 1 : 0.9}
             />
+            {/* Visible path */}
             <path
-              d={`M ${fromX} ${fromY} C ${fromX + cp} ${fromY}, ${toX - cp} ${toY}, ${toX} ${toY}`}
+              d={d}
               fill="none"
-              stroke={COLORS.connectionLine}
-              strokeWidth={2.5}
-              strokeDasharray="8 4"
-              markerEnd="url(#arrowhead)"
-              filter="url(#glow)"
-              opacity={0.7}
+              stroke={isSelected ? COLORS.accentLight : COLORS.connectionLine}
+              strokeWidth={isSelected ? 4 : 2.5}
+              strokeDasharray={isSelected ? "none" : "8 4"}
+              markerEnd={isSelected ? "url(#arrowhead-selected)" : "url(#arrowhead)"}
+              filter={isSelected ? "url(#glow-strong)" : "url(#glow)"}
+              opacity={isSelected ? 1 : 0.7}
             />
+            {/* Label */}
             {conn.label && (
               <text
                 x={(fromX + toX) / 2}
@@ -89,6 +152,35 @@ export function ConnectionLines({ screens, connections, previewLine, hotspotPrev
               >
                 {conn.label}
               </text>
+            )}
+            {/* Endpoint handles when selected */}
+            {isSelected && (
+              <>
+                <circle
+                  cx={fromX}
+                  cy={fromY}
+                  r={7}
+                  fill={COLORS.accent}
+                  stroke={COLORS.accentLight}
+                  strokeWidth={2}
+                  filter="url(#glow-strong)"
+                  cursor="grab"
+                  pointerEvents="all"
+                  onMouseDown={(e) => { e.stopPropagation(); onEndpointMouseDown?.(e, conn.id, "from"); }}
+                />
+                <circle
+                  cx={toX}
+                  cy={toY}
+                  r={7}
+                  fill={COLORS.accent}
+                  stroke={COLORS.accentLight}
+                  strokeWidth={2}
+                  filter="url(#glow-strong)"
+                  cursor="grab"
+                  pointerEvents="all"
+                  onMouseDown={(e) => { e.stopPropagation(); onEndpointMouseDown?.(e, conn.id, "to"); }}
+                />
+              </>
             )}
           </g>
         );
@@ -116,7 +208,7 @@ export function ConnectionLines({ screens, connections, previewLine, hotspotPrev
           <g>
             <circle cx={fromX} cy={fromY} r={5} fill={COLORS.success} opacity={0.8} />
             <path
-              d={`M ${fromX} ${fromY} C ${fromX + cp} ${fromY}, ${toX - cp} ${toY}, ${toX} ${toY}`}
+              d={bezierD(fromX, fromY, toX, toY, cp)}
               fill="none"
               stroke={COLORS.success}
               strokeWidth={2.5}
@@ -140,7 +232,7 @@ export function ConnectionLines({ screens, connections, previewLine, hotspotPrev
           <g>
             <circle cx={fromX} cy={fromY} r={5} fill={COLORS.connectionLine} opacity={0.6} />
             <path
-              d={`M ${fromX} ${fromY} C ${fromX + cp} ${fromY}, ${toX - cp} ${toY}, ${toX} ${toY}`}
+              d={bezierD(fromX, fromY, toX, toY, cp)}
               fill="none"
               stroke={COLORS.connectionLine}
               strokeWidth={2.5}

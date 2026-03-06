@@ -210,6 +210,16 @@ export function useScreenManager(pan, zoom) {
     });
   }, []);
 
+  const updateConnection = useCallback((connectionId, patch) => {
+    setConnections((prev) =>
+      prev.map((c) => (c.id === connectionId ? { ...c, ...patch } : c))
+    );
+  }, []);
+
+  const deleteConnection = useCallback((connectionId) => {
+    setConnections((prev) => prev.filter((c) => c.id !== connectionId));
+  }, []);
+
   const addConnection = useCallback((fromScreenId, toScreenId) => {
     setConnections((prev) => {
       const exists = prev.some(
@@ -260,6 +270,8 @@ export function useScreenManager(pan, zoom) {
     updateScreenDimensions,
     updateScreenDescription,
     quickConnectHotspot,
+    updateConnection,
+    deleteConnection,
     addConnection,
     replaceAll,
     mergeAll,
