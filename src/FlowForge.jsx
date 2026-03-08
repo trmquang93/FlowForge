@@ -562,6 +562,9 @@ export default function FlowForge() {
           e.preventDefault();
           deleteConnection(selectedConnection);
           setSelectedConnection(null);
+        } else if (selectedScreen) {
+          e.preventDefault();
+          removeScreen(selectedScreen);
         }
       }
       // Undo/Redo shortcuts
@@ -582,7 +585,7 @@ export default function FlowForge() {
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [connecting, cancelConnecting, hotspotInteraction, cancelHotspotInteraction, selectedConnection, deleteConnection, hotspotModal, renameModal, importConfirm, showInstructions, undo, redo]);
+  }, [connecting, cancelConnecting, hotspotInteraction, cancelHotspotInteraction, selectedConnection, deleteConnection, selectedScreen, removeScreen, hotspotModal, renameModal, importConfirm, showInstructions, undo, redo]);
 
   useEffect(() => {
     const onPaste = (e) => {
