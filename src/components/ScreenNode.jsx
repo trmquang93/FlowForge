@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { COLORS, FONTS } from "../styles/theme";
 
 export function ScreenNode({
@@ -12,7 +12,19 @@ export function ScreenNode({
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [draftDesc, setDraftDesc] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [altHeld, setAltHeld] = useState(false);
   const imgRef = useRef(null);
+
+  useEffect(() => {
+    const onKeyDown = (e) => { if (e.key === "Alt") setAltHeld(true); };
+    const onKeyUp = (e) => { if (e.key === "Alt") setAltHeld(false); };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, []);
 
   const borderColor = isConnectHoverTarget
     ? COLORS.success
@@ -237,7 +249,7 @@ export function ScreenNode({
                       ? `2px solid ${COLORS.accent}`
                       : `2px dashed ${hs.targetScreenId ? COLORS.success : COLORS.hotspotBorder}`,
                     borderRadius: 6,
-                    cursor: isSelected ? "grab" : "pointer",
+                    cursor: altHeld ? "crosshair" : isSelected ? "grab" : "pointer",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",

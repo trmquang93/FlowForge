@@ -183,9 +183,23 @@ export default function FlowForge() {
     cancelConnecting();
   }, [connecting, cancelConnecting, hotspotInteraction, quickConnectHotspot, addConnection, connections, screens, addToConditionalGroup]);
 
-  // Hotspot mouse down: select or begin reposition
+  // Hotspot mouse down: Alt+drag to connect, select, or begin reposition
   const onHotspotMouseDown = useCallback((e, screenId, hotspotId) => {
     e.preventDefault();
+    // Alt/Option + mousedown: immediately start hotspot-drag to connect
+    if (e.altKey) {
+      const rect = canvasRef.current.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left - pan.x) / zoom;
+      const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+      setHotspotInteraction({
+        mode: "hotspot-drag",
+        screenId,
+        hotspotId,
+        mouseX,
+        mouseY,
+      });
+      return;
+    }
     if (hotspotInteraction?.mode === "selected" && hotspotInteraction.hotspotId === hotspotId) {
       // Same hotspot selected again -> begin reposition
       const rect = canvasRef.current.getBoundingClientRect();
@@ -207,7 +221,7 @@ export default function FlowForge() {
       // Select this hotspot
       setHotspotInteraction({ mode: "selected", screenId, hotspotId });
     }
-  }, [hotspotInteraction, canvasRef, screens, captureDragSnapshot]);
+  }, [hotspotInteraction, canvasRef, screens, captureDragSnapshot, pan, zoom]);
 
   // Image area mouse down: begin draw
   const onImageAreaMouseDown = useCallback((e, screenId) => {
