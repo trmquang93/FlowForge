@@ -5,6 +5,7 @@ import { computePoints } from "./ConnectionLines";
 export function InlineConditionLabels({ connections, screens, conditionGroupId, onUpdateLabel, onDone }) {
   const groupConns = connections.filter((c) => c.conditionGroupId === conditionGroupId);
   const inputRefs = useRef([]);
+  const savedByKeyRef = useRef({});
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -18,7 +19,10 @@ export function InlineConditionLabels({ connections, screens, conditionGroupId, 
     if (!el) return;
     const val = el.value.trim();
     const conn = groupConns[index];
-    if (conn) onUpdateLabel(conn.id, { condition: val, label: val });
+    if (conn) {
+      savedByKeyRef.current[index] = true;
+      onUpdateLabel(conn.id, { condition: val, label: val });
+    }
   }, [groupConns, onUpdateLabel]);
 
   const onKeyDown = useCallback((e, index) => {
@@ -34,11 +38,10 @@ export function InlineConditionLabels({ connections, screens, conditionGroupId, 
     }
     if (e.key === "Escape") {
       e.preventDefault();
-      // Save all inputs before closing
       groupConns.forEach((_, i) => saveInput(i));
       onDone();
     }
-  }, [groupConns.length, onDone, saveInput]);
+  }, [groupConns, onDone, saveInput]);
 
   return (
     <>
@@ -66,6 +69,10 @@ export function InlineConditionLabels({ connections, screens, conditionGroupId, 
               defaultValue={conn.condition || conn.label || ""}
               placeholder={`condition ${i + 1}`}
               onBlur={(e) => {
+                if (savedByKeyRef.current[i]) {
+                  savedByKeyRef.current[i] = false;
+                  return;
+                }
                 const val = e.target.value.trim();
                 onUpdateLabel(conn.id, { condition: val, label: val });
               }}

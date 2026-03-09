@@ -663,6 +663,8 @@ export default function FlowForge() {
   // Keyboard shortcuts: Escape cancels, Delete/Backspace removes selected connection
   useEffect(() => {
     const onKeyDown = (e) => {
+      const anyModalOpen = !!(hotspotModal || connectionEditModal || renameModal || importConfirm || showInstructions || showDocuments || conditionalPrompt || editingConditionGroup);
+
       if (e.key === "Escape") {
         if (conditionalPrompt) {
           setConditionalPrompt(null);
@@ -683,7 +685,7 @@ export default function FlowForge() {
       if (e.key === "Delete" || e.key === "Backspace") {
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (hotspotModal || connectionEditModal || renameModal || importConfirm || showInstructions || showDocuments || conditionalPrompt || editingConditionGroup) return;
+        if (anyModalOpen) return;
         if (selectedConnection) {
           e.preventDefault();
           const selConn = connections.find((c) => c.id === selectedConnection);
@@ -720,14 +722,14 @@ export default function FlowForge() {
       if ((e.metaKey || e.ctrlKey) && e.key === "z" && !e.shiftKey) {
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (hotspotModal || connectionEditModal || renameModal || importConfirm || showInstructions || showDocuments || conditionalPrompt || editingConditionGroup) return;
+        if (anyModalOpen) return;
         e.preventDefault();
         undo();
       }
       if ((e.metaKey || e.ctrlKey) && e.key === "z" && e.shiftKey) {
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA") return;
-        if (hotspotModal || connectionEditModal || renameModal || importConfirm || showInstructions || showDocuments || conditionalPrompt || editingConditionGroup) return;
+        if (anyModalOpen) return;
         e.preventDefault();
         redo();
       }
@@ -908,7 +910,7 @@ export default function FlowForge() {
                 connections={connections}
                 screens={screens}
                 conditionGroupId={editingConditionGroup}
-                onUpdateLabel={(connId, patch) => updateConnection(connId, patch)}
+                onUpdateLabel={updateConnection}
                 onDone={() => setEditingConditionGroup(null)}
               />
             )}

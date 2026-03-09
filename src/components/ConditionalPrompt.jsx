@@ -1,4 +1,4 @@
-import { COLORS, FONTS } from "../styles/theme";
+import { COLORS, FONTS, styles } from "../styles/theme";
 
 export function ConditionalPrompt({ x, y, onConfirm, onCancel }) {
   return (
@@ -33,16 +33,12 @@ export function ConditionalPrompt({ x, y, onConfirm, onCancel }) {
         <button
           onClick={onConfirm}
           style={{
+            ...styles.btnPrimary,
             flex: 1,
             padding: "7px 0",
             background: COLORS.condition,
-            border: "none",
             borderRadius: 6,
-            color: "#fff",
             fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: FONTS.mono,
           }}
         >
           Yes
@@ -50,15 +46,11 @@ export function ConditionalPrompt({ x, y, onConfirm, onCancel }) {
         <button
           onClick={onCancel}
           style={{
+            ...styles.btnCancel,
             flex: 1,
             padding: "7px 0",
-            background: "transparent",
-            border: `1px solid ${COLORS.border}`,
             borderRadius: 6,
-            color: COLORS.textMuted,
             fontSize: 12,
-            cursor: "pointer",
-            fontFamily: FONTS.mono,
           }}
         >
           No
