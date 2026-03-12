@@ -9,6 +9,7 @@ export function useImportExport({
   documents,
   pan,
   zoom,
+  featureBrief,
   replaceAll,
   mergeAll,
   setPan,
@@ -18,8 +19,8 @@ export function useImportExport({
   const importFileRef = useRef(null);
 
   const onExport = useCallback(() => {
-    exportFlow(screens, connections, pan, zoom, documents);
-  }, [screens, connections, documents, pan, zoom]);
+    exportFlow(screens, connections, pan, zoom, documents, featureBrief);
+  }, [screens, connections, documents, pan, zoom, featureBrief]);
 
   const onImport = useCallback(() => {
     importFileRef.current?.click();

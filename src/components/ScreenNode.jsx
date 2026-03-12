@@ -8,6 +8,7 @@ export function ScreenNode({
   onHotspotDragHandleMouseDown,
   onResizeHandleMouseDown, onScreenDimensions, drawRect, isHotspotDragging,
   onUpdateDescription, isSpaceHeld, onAddState, onDropImage, activeTool,
+  scopeRoot, isInScope,
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -27,9 +28,25 @@ export function ScreenNode({
     };
   }, []);
 
+  const status = screen.status || "new";
+  const STATUS_BORDER = { new: COLORS.border, modify: "#fdcb6e", existing: "#444" };
+  const STATUS_CHIP = {
+    new:      { label: "New",      color: "#00b894", bg: "rgba(0,184,148,0.18)" },
+    modify:   { label: "Modify",   color: "#fdcb6e", bg: "rgba(253,203,110,0.18)" },
+    existing: { label: "Existing", color: "#636e72", bg: "rgba(99,110,114,0.18)" },
+  };
+
+  const isScopeRoot = scopeRoot != null && screen.id === scopeRoot;
+  // isInScope: undefined = no scope set (all visible), true/false = in or out of scope
+  const outOfScope = isInScope === false;
+
   const borderColor = isConnectHoverTarget
     ? COLORS.success
-    : selected ? COLORS.borderActive : COLORS.border;
+    : selected
+      ? COLORS.borderActive
+      : isScopeRoot
+        ? COLORS.accent
+        : STATUS_BORDER[status];
 
   const handleImgLoad = useCallback(() => {
     setImgLoaded(true);
@@ -87,7 +104,11 @@ export function ScreenNode({
         top: screen.y,
         width: screen.width || 220,
         minHeight: 80,
-        background: isDragOver ? "rgba(0,210,211,0.05)" : COLORS.screenBg,
+        background: isDragOver
+          ? "rgba(0,210,211,0.05)"
+          : status === "existing"
+            ? "rgba(10,10,18,0.85)"
+            : COLORS.screenBg,
         border: `2px solid ${isDragOver ? COLORS.success : borderColor}`,
         borderRadius: 14,
         cursor: isConnecting || isHotspotDragging ? "default" : "grab",
@@ -95,12 +116,15 @@ export function ScreenNode({
           ? `0 0 30px rgba(0,210,211,0.3), 0 8px 32px rgba(0,0,0,0.5)`
           : isConnectHoverTarget
             ? `0 0 30px rgba(0,210,211,0.3), 0 8px 32px rgba(0,0,0,0.5)`
-            : selected
-              ? `0 0 30px ${COLORS.accentGlow}, 0 8px 32px rgba(0,0,0,0.5)`
-              : "0 4px 20px rgba(0,0,0,0.4)",
-        transition: "border-color 0.2s, box-shadow 0.2s, background 0.2s",
+            : isScopeRoot
+              ? `0 0 20px rgba(108,92,231,0.4), 0 8px 32px rgba(0,0,0,0.5)`
+              : selected
+                ? `0 0 30px ${COLORS.accentGlow}, 0 8px 32px rgba(0,0,0,0.5)`
+                : "0 4px 20px rgba(0,0,0,0.4)",
+        transition: "border-color 0.2s, box-shadow 0.2s, background 0.2s, opacity 0.2s",
         overflow: "hidden",
         userSelect: "none",
+        opacity: outOfScope ? 0.3 : status === "existing" ? 0.65 : 1,
       }}
     >
       {/* Header */}
@@ -111,7 +135,6 @@ export function ScreenNode({
           borderBottom: `1px solid ${COLORS.border}`,
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
           gap: 6,
         }}
       >
@@ -125,6 +148,8 @@ export function ScreenNode({
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
             fontFamily: FONTS.mono,
+            flex: 1,
+            minWidth: 0,
           }}
         >
           {screen.name}
@@ -146,7 +171,47 @@ export function ScreenNode({
             </span>
           )}
         </span>
-        <div style={{ display: "flex", gap: 4 }}>
+
+        {/* Status chip + scope root badge */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+          {isScopeRoot && (
+            <span
+              title="Scope root — instructions generated from here"
+              style={{
+                fontSize: 9,
+                color: COLORS.accentLight,
+                background: "rgba(108,92,231,0.2)",
+                border: "1px solid rgba(108,92,231,0.35)",
+                borderRadius: 4,
+                padding: "1px 5px",
+                fontFamily: FONTS.mono,
+                whiteSpace: "nowrap",
+              }}
+            >
+              ⊙ root
+            </span>
+          )}
+          {(status !== "new" || isScopeRoot) && (
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 600,
+                color: STATUS_CHIP[status].color,
+                background: STATUS_CHIP[status].bg,
+                borderRadius: 4,
+                padding: "1px 5px",
+                fontFamily: FONTS.mono,
+                whiteSpace: "nowrap",
+                display: status === "new" && !isScopeRoot ? "none" : "inline",
+              }}
+            >
+              {STATUS_CHIP[status].label}
+            </span>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
           <button
             className="screen-btn"
             onClick={(e) => { e.stopPropagation(); onAddState?.(screen.id); }}

@@ -12,7 +12,7 @@ export function importFlow(fileText) {
     throw new Error("Invalid file: missing version field.");
   }
 
-  if (data.version > 6) {
+  if (data.version > 7) {
     throw new Error(
       `Unsupported file version ${data.version}. Please update Drawd to open this file.`
     );
@@ -36,6 +36,7 @@ export function importFlow(fileText) {
     if (screen.stateGroup === undefined) screen.stateGroup = null;
     if (screen.stateName === undefined) screen.stateName = "";
     if (screen.notes === undefined) screen.notes = "";
+    if (screen.status === undefined) screen.status = "new";
     if (Array.isArray(screen.hotspots)) {
       for (const hs of screen.hotspots) {
         if (!hs.elementType) hs.elementType = "button";
@@ -81,6 +82,10 @@ export function importFlow(fileText) {
     if (conn.condition === undefined) conn.condition = "";
     if (conn.conditionGroupId === undefined) conn.conditionGroupId = null;
   }
+
+  // Backward compat: featureBrief
+  if (!data.metadata) data.metadata = {};
+  if (!data.metadata.featureBrief) data.metadata.featureBrief = "";
 
   return data;
 }

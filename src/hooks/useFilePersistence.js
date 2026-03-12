@@ -11,19 +11,21 @@ const DRAWD_FILE_TYPES = [
   },
 ];
 
-export function useFilePersistence(screens, connections, pan, zoom, documents = []) {
+export function useFilePersistence(screens, connections, pan, zoom, documents = [], featureBrief = "") {
   const fileHandleRef = useRef(null);
   const [connectedFileName, setConnectedFileName] = useState(null);
   const [saveStatus, setSaveStatus] = useState("idle");
   const panRef = useRef(pan);
   const zoomRef = useRef(zoom);
+  const featureBriefRef = useRef(featureBrief);
   const skipNextSaveRef = useRef(false);
   const debounceRef = useRef(null);
   const statusTimeoutRef = useRef(null);
 
-  // Keep viewport refs in sync without triggering auto-save
+  // Keep viewport and brief refs in sync without triggering auto-save
   useEffect(() => { panRef.current = pan; }, [pan]);
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  useEffect(() => { featureBriefRef.current = featureBrief; }, [featureBrief]);
 
   const writeToDisk = useCallback(async () => {
     const handle = fileHandleRef.current;
@@ -31,7 +33,7 @@ export function useFilePersistence(screens, connections, pan, zoom, documents = 
 
     setSaveStatus("saving");
     try {
-      const payload = buildPayload(screens, connections, panRef.current, zoomRef.current, documents);
+      const payload = buildPayload(screens, connections, panRef.current, zoomRef.current, documents, featureBriefRef.current);
       const json = JSON.stringify(payload, null, 2);
       const writable = await handle.createWritable();
       await writable.write(json);
@@ -104,7 +106,7 @@ export function useFilePersistence(screens, connections, pan, zoom, documents = 
       skipNextSaveRef.current = false;
 
       // Write immediately
-      const payload = buildPayload(screens, connections, panRef.current, zoomRef.current, documents);
+      const payload = buildPayload(screens, connections, panRef.current, zoomRef.current, documents, featureBriefRef.current);
       const json = JSON.stringify(payload, null, 2);
       const writable = await handle.createWritable();
       await writable.write(json);

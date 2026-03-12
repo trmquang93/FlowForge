@@ -100,6 +100,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
       imageData,
       description: "",
       notes: "",
+      status: "new",
       hotspots: [],
       stateGroup: null,
       stateName: "",
@@ -127,6 +128,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
       imageData,
       description: "",
       notes: "",
+      status: "new",
       hotspots: [],
       stateGroup: null,
       stateName: "",
@@ -173,6 +175,14 @@ export function useScreenManager(pan, zoom, canvasRef) {
     pushHistory(screens, connections, documents);
     setScreens((prev) => prev.map((s) => (s.id === id ? { ...s, notes } : s)));
   }, [screens, connections, documents, pushHistory]);
+
+  const updateScreenStatus = useCallback((id, status) => {
+    setScreens((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)));
+  }, []);
+
+  const markAllExisting = useCallback(() => {
+    setScreens((prev) => prev.map((s) => ({ ...s, status: "existing" })));
+  }, []);
 
   const assignScreenImage = useCallback((id, imageData) => {
     pushHistory(screens, connections, documents);
@@ -627,6 +637,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
       imageData: null,
       description: "",
       notes: "",
+      status: "new",
       hotspots: [],
       stateGroup: groupId,
       stateName: `State ${stateNumber - 1}`,
@@ -708,6 +719,8 @@ export function useScreenManager(pan, zoom, canvasRef) {
     updateScreenDimensions,
     updateScreenDescription,
     updateScreenNotes,
+    updateScreenStatus,
+    markAllExisting,
     assignScreenImage,
     quickConnectHotspot,
     updateConnection,

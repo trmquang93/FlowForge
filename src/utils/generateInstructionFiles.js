@@ -145,6 +145,8 @@ function generateMainMd(screens, connections, options, navAnalysis, images, docu
   const platformLabel = platform === "auto"
     ? "Auto (choose based on project needs)"
     : (PLATFORM_TERMINOLOGY[platform]?.name || platform);
+  const featureBrief = options.featureBrief || "";
+  const allScreens = options.allScreens || screens;
 
   // Detect dominant device type
   const deviceTypes = sorted
@@ -154,9 +156,22 @@ function generateMainMd(screens, connections, options, navAnalysis, images, docu
     ? mostCommon(deviceTypes)
     : "Unknown";
 
+  // Count by status
+  const newScreens = allScreens.filter(s => !s.status || s.status === "new");
+  const modifyScreens = allScreens.filter(s => s.status === "modify");
+  const existingScreens = allScreens.filter(s => s.status === "existing");
+  const hasStatusInfo = newScreens.length + modifyScreens.length + existingScreens.length > 0 &&
+    (modifyScreens.length > 0 || existingScreens.length > 0);
+
   let md = `# AI Build Instructions\n\n`;
+
+  // Feature brief comes first
+  if (featureBrief) {
+    md += `## Feature Brief\n\n${featureBrief}\n\n---\n\n`;
+  }
+
   md += `| | |\n|---|---|\n`;
-  md += `| **Screens** | ${screens.length} |\n`;
+  md += `| **Screens to build** | ${newScreens.length > 0 ? `${newScreens.length} new` : "—"}${modifyScreens.length > 0 ? `, ${modifyScreens.length} to modify` : ""}${existingScreens.length > 0 ? `, ${existingScreens.length} existing (context only)` : ""} |\n`;
   md += `| **Connections** | ${connections.length} |\n`;
   md += `| **Documents** | ${documents.length} |\n`;
   md += `| **Platform** | ${platformLabel} |\n`;
@@ -176,11 +191,18 @@ function generateMainMd(screens, connections, options, navAnalysis, images, docu
   md += `---\n\n`;
 
   md += `## Your Role as Orchestrator\n\n`;
-  md += `> **You are the project orchestrator.** Your responsibility is to ship the implemented\n`;
-  md += `> flow — whether it's a single feature, a partial user journey, or a complete app. You plan,\n`;
-  md += `> delegate, track, and integrate. Assess the scope from the Screen Roster and navigation\n`;
-  md += `> summary below: it may be a standalone product or a feature to wire into an existing codebase.\n`;
-  md += `>\n`;
+  if (existingScreens.length > 0 || modifyScreens.length > 0) {
+    md += `> **You are implementing a feature in an existing codebase.** Screens marked "Existing" are\n`;
+    md += `> already implemented — do NOT rebuild them. Screens marked "Modify" need targeted changes.\n`;
+    md += `> Screens marked "New" need to be created from scratch.\n`;
+    md += `>\n`;
+  } else {
+    md += `> **You are the project orchestrator.** Your responsibility is to ship the implemented\n`;
+    md += `> flow — whether it's a single feature, a partial user journey, or a complete app. You plan,\n`;
+    md += `> delegate, track, and integrate. Assess the scope from the Screen Roster and navigation\n`;
+    md += `> summary below: it may be a standalone product or a feature to wire into an existing codebase.\n`;
+    md += `>\n`;
+  }
   md += `> **What you work from:** This file (\`main.md\`) gives you everything you need to plan and\n`;
   md += `> delegate. You do NOT need to read the detail files (\`screens.md\`, \`navigation.md\`,\n`;
   md += `> \`build-guide.md\`) yourself — those are for your sub-agents. Trust the Screen Roster and\n`;
@@ -194,8 +216,8 @@ function generateMainMd(screens, connections, options, navAnalysis, images, docu
 
   md += `## Screen Roster\n\n`;
   md += `Use this inventory to plan your delegation. Each sub-agent will implement one screen.\n\n`;
-  md += `| # | Screen | Image | Role |\n`;
-  md += `|---|--------|-------|------|\n`;
+  md += `| # | Screen | Image | Status | Role |\n`;
+  md += `|---|--------|-------|--------|------|\n`;
 
   sorted.forEach((s, i) => {
     const imgRef = imageRefForScreen(s, images) || "—";
@@ -209,9 +231,20 @@ function generateMainMd(screens, connections, options, navAnalysis, images, docu
     if (isTab) roles.push("tab");
     if (isModal) roles.push("modal");
     const stateLabel = (s.stateGroup && s.stateName) ? ` (${s.stateName})` : "";
-    md += `| ${i + 1} | ${s.name}${stateLabel} | \`${imgRef}\` | ${roles.length > 0 ? roles.join(", ") : "screen"} |\n`;
+    const statusLabel = s.status === "existing" ? "⬜ Existing" : s.status === "modify" ? "🔶 Modify" : "🟢 New";
+    md += `| ${i + 1} | ${s.name}${stateLabel} | \`${imgRef}\` | ${statusLabel} | ${roles.length > 0 ? roles.join(", ") : "screen"} |\n`;
   });
   md += `\n`;
+
+  // Context-only screens (existing)
+  if (existingScreens.length > 0) {
+    md += `### Context Screens (do not rebuild)\n\n`;
+    md += `These screens already exist in the codebase. Reference them for navigation context only:\n\n`;
+    existingScreens.forEach((s) => {
+      md += `- **${s.name}** — already implemented\n`;
+    });
+    md += `\n`;
+  }
 
   md += `## Delegation & Progress Tracking\n\n`;
   md += `Analyze the Screen Roster and the navigation pattern above, then decide:\n\n`;
@@ -417,6 +450,11 @@ function generateDocumentsMd(documents) {
 
 function generateScreensMd(screens, connections, images, documents = []) {
   const sorted = sortedScreens(screens);
+
+  // Separate screens by status
+  const toBuild = sorted.filter(s => !s.status || s.status === "new" || s.status === "modify");
+  const contextOnly = sorted.filter(s => s.status === "existing");
+
   let md = `# Screens\n\n`;
 
   // Build stateGroup map
@@ -431,14 +469,18 @@ function generateScreensMd(screens, connections, images, documents = []) {
   const output = new Set();
   let screenNum = 0;
 
-  sorted.forEach((s) => {
+  // Build / modify screens first
+  const primaryScreens = toBuild.length > 0 ? toBuild : sorted;
+  primaryScreens.forEach((s) => {
     if (output.has(s.id)) return;
 
     screenNum++;
 
+    const statusTag = s.status === "modify" ? " *(modify existing)*" : s.status === "existing" ? " *(existing — context only)*" : "";
+
     if (s.stateGroup && stateGroups[s.stateGroup]?.length >= 2) {
       const group = stateGroups[s.stateGroup];
-      md += `## Screen ${screenNum}: ${s.name}\n\n`;
+      md += `## Screen ${screenNum}: ${s.name}${statusTag}\n\n`;
       md += `*This screen has ${group.length} states:*\n\n`;
 
       group.forEach((gs) => {
@@ -450,11 +492,24 @@ function generateScreensMd(screens, connections, images, documents = []) {
       md += `---\n\n`;
     } else {
       output.add(s.id);
-      md += `## Screen ${screenNum}: ${s.name}\n\n`;
+      md += `## Screen ${screenNum}: ${s.name}${statusTag}\n\n`;
       md += generateScreenDetailMd(s, screens, images, documents);
       md += `---\n\n`;
     }
   });
+
+  // Context-only (existing) screens in a separate section
+  if (contextOnly.length > 0 && toBuild.length > 0) {
+    md += `---\n\n# Context Screens (already implemented — do NOT rebuild)\n\n`;
+    md += `These screens exist in the codebase. Listed for reference only.\n\n`;
+    contextOnly.forEach((s) => {
+      output.add(s.id);
+      screenNum++;
+      md += `## Screen ${screenNum}: ${s.name} *(existing)*\n\n`;
+      if (s.description) md += `${s.description}\n\n`;
+      md += `---\n\n`;
+    });
+  }
 
   return md;
 }

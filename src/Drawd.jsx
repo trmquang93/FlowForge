@@ -50,12 +50,33 @@ export default function Drawd() {
     addState, updateStateName, addDocument, updateDocument, deleteDocument,
     replaceAll, mergeAll,
     canUndo, canRedo, undo, redo, captureDragSnapshot, commitDragSnapshot,
+    updateScreenStatus, markAllExisting,
   } = useScreenManager(pan, zoom, canvasRef);
+
+  // ── Feature brief + scope ─────────────────────────────────────────────────
+  const [featureBrief, setFeatureBrief] = useState("");
+  const [scopeRoot, setScopeRoot] = useState(null);
+
+  // BFS forward from scopeRoot following connections
+  const scopeScreenIds = scopeRoot ? (() => {
+    const visited = new Set([scopeRoot]);
+    const queue = [scopeRoot];
+    while (queue.length > 0) {
+      const id = queue.shift();
+      for (const conn of connections) {
+        if (conn.fromScreenId === id && !visited.has(conn.toScreenId)) {
+          visited.add(conn.toScreenId);
+          queue.push(conn.toScreenId);
+        }
+      }
+    }
+    return visited;
+  })() : null;
 
   const {
     connectedFileName, saveStatus, isFileSystemSupported,
     openFile, saveAs, saveNow, disconnect,
-  } = useFilePersistence(screens, connections, pan, zoom, documents);
+  } = useFilePersistence(screens, connections, pan, zoom, documents, featureBrief);
 
   // ── File actions ───────────────────────────────────────────────────
   const onOpen = useCallback(async () => {
@@ -64,6 +85,8 @@ export default function Drawd() {
       if (!payload) return;
       replaceAll(payload.screens, payload.connections, payload.screens.length + 1, payload.documents || []);
       if (payload.viewport) { setPan(payload.viewport.pan); setZoom(payload.viewport.zoom); }
+      setFeatureBrief(payload.metadata?.featureBrief || "");
+      setScopeRoot(null);
     } catch (err) { alert(err.message); }
   }, [openFile, replaceAll, setPan, setZoom]);
 
@@ -78,6 +101,8 @@ export default function Drawd() {
     replaceAll([], [], 1, []);
     setPan({ x: 0, y: 0 });
     setZoom(1);
+    setFeatureBrief("");
+    setScopeRoot(null);
     disconnect();
   }, [screens.length, replaceAll, setPan, setZoom, disconnect]);
 
@@ -219,7 +244,7 @@ export default function Drawd() {
 
   // ── Import / export ────────────────────────────────────────────────────────────────
   const { importConfirm, setImportConfirm, importFileRef, onExport, onImport, onImportFileChange, onImportReplace, onImportMerge } =
-    useImportExport({ screens, connections, documents, pan, zoom, replaceAll, mergeAll, setPan, setZoom });
+    useImportExport({ screens, connections, documents, pan, zoom, featureBrief, replaceAll, mergeAll, setPan, setZoom });
 
   // ── Keyboard shortcuts ──────────────────────────────────────────────────────────────
   useKeyboardShortcuts({
@@ -265,10 +290,19 @@ export default function Drawd() {
 
   const onGenerate = useCallback(() => {
     if (screens.length === 0) return;
-    const result = generateInstructionFiles(screens, connections, { platform: "auto", documents });
+    const scopedScreens = scopeScreenIds
+      ? screens.filter((s) => scopeScreenIds.has(s.id))
+      : screens;
+    const result = generateInstructionFiles(scopedScreens, connections, {
+      platform: "auto",
+      documents,
+      featureBrief,
+      scopeScreenIds,
+      allScreens: screens,
+    });
     setInstructions(result);
     setShowInstructions(true);
-  }, [screens, connections, documents]);
+  }, [screens, connections, documents, featureBrief, scopeScreenIds]);
 
   const onScreensPanelClick = useCallback((screenId) => {
     setSelectedScreen(screenId);
@@ -343,6 +377,13 @@ export default function Drawd() {
           screens={screens}
           selectedScreen={selectedScreen}
           onScreenClick={onScreensPanelClick}
+          onUpdateStatus={updateScreenStatus}
+          onMarkAllExisting={markAllExisting}
+          scopeRoot={scopeRoot}
+          onSetScopeRoot={setScopeRoot}
+          scopeScreenIds={scopeScreenIds}
+          featureBrief={featureBrief}
+          onFeatureBriefChange={setFeatureBrief}
         />
 
         {/* Canvas */}
@@ -405,6 +446,8 @@ export default function Drawd() {
                 onAddState={addState}
                 onDropImage={handleDropImage}
                 activeTool={activeTool}
+                scopeRoot={scopeRoot}
+                isInScope={scopeScreenIds ? scopeScreenIds.has(screen.id) : undefined}
               />
             ))}
             <ConnectionLines
@@ -474,6 +517,7 @@ export default function Drawd() {
             onSelectScreen={setSelectedScreen}
             onUpdateStateName={updateStateName}
             onUpdateNotes={updateScreenNotes}
+            onUpdateStatus={updateScreenStatus}
           />
         )}
       </div>

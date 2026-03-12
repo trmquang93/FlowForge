@@ -2,7 +2,14 @@ import { COLORS, FONTS } from "../styles/theme";
 
 import { useState } from "react";
 
-export function Sidebar({ screen, screens, connections, onClose, onRename, onAddHotspot, onEditHotspot, onAddState, onSelectScreen, onUpdateStateName, onUpdateNotes }) {
+const STATUS_CONFIG = {
+  new:      { label: "New",      color: "#00b894", bg: "rgba(0,184,148,0.15)" },
+  modify:   { label: "Modify",   color: "#fdcb6e", bg: "rgba(253,203,110,0.15)" },
+  existing: { label: "Existing", color: "#636e72", bg: "rgba(99,110,114,0.15)" },
+};
+const STATUS_CYCLE = { new: "modify", modify: "existing", existing: "new" };
+
+export function Sidebar({ screen, screens, connections, onClose, onRename, onAddHotspot, onEditHotspot, onAddState, onSelectScreen, onUpdateStateName, onUpdateNotes, onUpdateStatus }) {
   const [draftNotes, setDraftNotes] = useState(screen.notes || "");
   const [notesScreenId, setNotesScreenId] = useState(screen.id);
 
@@ -13,6 +20,8 @@ export function Sidebar({ screen, screens, connections, onClose, onRename, onAdd
   }
 
   const incomingLinks = connections.filter((c) => c.toScreenId === screen.id);
+  const status = screen.status || "new";
+  const statusCfg = STATUS_CONFIG[status];
 
   return (
     <div
@@ -82,7 +91,30 @@ export function Sidebar({ screen, screens, connections, onClose, onRename, onAdd
         </button>
       </div>
 
-      {/* Description */}
+      {/* Build status chip */}
+      <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 10, color: COLORS.textMuted, fontFamily: FONTS.mono, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          Build status
+        </span>
+        <button
+          onClick={() => onUpdateStatus?.(screen.id, STATUS_CYCLE[status])}
+          title="Click to cycle: New → Modify → Existing"
+          style={{
+            padding: "3px 9px",
+            borderRadius: 4,
+            border: "none",
+            background: statusCfg.bg,
+            color: statusCfg.color,
+            fontFamily: FONTS.mono,
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: "pointer",
+            letterSpacing: "0.03em",
+          }}
+        >
+          {statusCfg.label}
+        </button>
+      </div>
       <div
         style={{
           padding: "10px 12px",
