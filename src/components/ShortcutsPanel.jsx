@@ -13,7 +13,9 @@ const SHORTCUTS = [
   {
     category: "Canvas",
     items: [
-      { keys: ["Space", "Drag"], desc: "Pan canvas" },
+      { keys: ["V"], desc: "Select tool" },
+      { keys: ["H"], desc: "Pan tool" },
+      { keys: ["Space", "Drag"], desc: "Pan canvas (temporary)" },
       { keys: ["Scroll"], desc: "Zoom in / out" },
       { keys: ["Alt", "Click hotspot"], desc: "Drag to connect" },
       { keys: ["Shift", "Click hotspot"], desc: "Multi-select hotspots" },

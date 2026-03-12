@@ -37,6 +37,8 @@ export function useKeyboardShortcuts({
   onSaveAs,
   onExport,
   onOpen,
+  // tool mode
+  setActiveTool,
 }) {
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -50,6 +52,22 @@ export function useKeyboardShortcuts({
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA") return;
         setShowShortcuts((prev) => !prev);
+        return;
+      }
+
+      // Tool switching: V = select, H = pan
+      if ((e.key === "v" || e.key === "V") && !e.metaKey && !e.ctrlKey) {
+        const tag = document.activeElement?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if (anyModalOpen) return;
+        setActiveTool("select");
+        return;
+      }
+      if ((e.key === "h" || e.key === "H") && !e.metaKey && !e.ctrlKey) {
+        const tag = document.activeElement?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if (anyModalOpen) return;
+        setActiveTool("pan");
         return;
       }
 
@@ -138,5 +156,6 @@ export function useKeyboardShortcuts({
     showInstructions, showDocuments, showShortcuts, setShowShortcuts, undo, redo,
     saveNow, isFileSystemSupported, onSaveAs, onExport, onOpen,
     conditionalPrompt, editingConditionGroup, selectedHotspots, setSelectedHotspots, deleteHotspots,
+    setActiveTool,
   ]);
 }

@@ -42,8 +42,21 @@ export function useCanvasMouseHandlers({
   pan,
   zoom,
   canvasRef,
+  // tool mode
+  activeTool,
 }) {
   const onCanvasMouseDown = useCallback((e) => {
+    // Pan tool: always pan, skip all other interactions
+    if (activeTool === "pan") {
+      if (selectedConnection) setSelectedConnection(null);
+      if (selectedHotspots.length > 0) setSelectedHotspots([]);
+      if (hotspotInteraction && hotspotInteraction.mode !== "draw" && hotspotInteraction.mode !== "reposition" && hotspotInteraction.mode !== "hotspot-drag" && hotspotInteraction.mode !== "resize" && hotspotInteraction.mode !== "conn-endpoint-drag") {
+        setHotspotInteraction(null);
+      }
+      handleCanvasMouseDown(e);
+      setSelectedScreen(null);
+      return;
+    }
     // Space+click: always pan, skip all interaction guards
     if (isSpaceHeld.current) {
       if (selectedConnection) setSelectedConnection(null);
@@ -77,7 +90,7 @@ export function useCanvasMouseHandlers({
     }
     const wasPan = handleCanvasMouseDown(e);
     if (wasPan) setSelectedScreen(null);
-  }, [handleCanvasMouseDown, setSelectedScreen, connecting, cancelConnecting, hotspotInteraction, setHotspotInteraction, selectedConnection, setSelectedConnection, isSpaceHeld, conditionalPrompt, onConditionalPromptCancel, editingConditionGroup, setEditingConditionGroup, selectedHotspots, setSelectedHotspots]);
+  }, [handleCanvasMouseDown, setSelectedScreen, connecting, cancelConnecting, hotspotInteraction, setHotspotInteraction, selectedConnection, setSelectedConnection, isSpaceHeld, conditionalPrompt, onConditionalPromptCancel, editingConditionGroup, setEditingConditionGroup, selectedHotspots, setSelectedHotspots, activeTool]);
 
   const onCanvasMouseMove = useCallback((e) => {
     if (hotspotInteraction?.mode === "draw") {
@@ -270,7 +283,9 @@ export function useCanvasMouseHandlers({
     handleMouseUp(e);
   }, [connecting, cancelConnecting, handleMouseUp, hotspotInteraction, setHotspotInteraction, commitDragSnapshot]);
 
-  const canvasCursor = connecting || hotspotInteraction?.mode === "hotspot-drag" || hotspotInteraction?.mode === "conn-endpoint-drag"
+  const canvasCursor = activeTool === "pan"
+    ? (isPanning ? "grabbing" : "grab")
+    : connecting || hotspotInteraction?.mode === "hotspot-drag" || hotspotInteraction?.mode === "conn-endpoint-drag"
     ? "crosshair"
     : hotspotInteraction?.mode === "draw"
       ? "crosshair"

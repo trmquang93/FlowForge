@@ -23,17 +23,21 @@ import { EmptyState } from "./components/EmptyState";
 import { ConditionalPrompt } from "./components/ConditionalPrompt";
 import { InlineConditionLabels } from "./components/InlineConditionLabels";
 import { ShortcutsPanel } from "./components/ShortcutsPanel";
-import { BatchHotspotBar } from "./components/BatchHotspotBar";
 import { ScreensPanel } from "./components/ScreensPanel";
+import { BatchHotspotBar } from "./components/BatchHotspotBar";
+import { ToolBar } from "./components/ToolBar";
 
 const HEADER_HEIGHT = 37;
 
 export default function Drawd() {
+  // ── Active tool ──────────────────────────────────────────────────────────
+  const [activeTool, setActiveTool] = useState("select");
+
   // ── Core hooks ──────────────────────────────────────────────
   const {
     pan, setPan, zoom, setZoom, isPanning, dragging, canvasRef,
     isSpaceHeld, spaceHeld, handleDragStart, handleMouseMove, handleMouseUp, handleCanvasMouseDown,
-  } = useCanvas();
+  } = useCanvas(activeTool);
 
   const {
     screens, connections, documents, selectedScreen, setSelectedScreen,
@@ -107,6 +111,7 @@ export default function Drawd() {
     connecting, setSelectedConnection,
     captureDragSnapshot, commitDragSnapshot,
     moveHotspot, resizeHotspot, updateScreenDimensions, assignScreenImage,
+    activeTool,
   });
 
   const {
@@ -209,6 +214,7 @@ export default function Drawd() {
       isSpaceHeld, spaceHeld, isPanning, dragging,
       setSelectedScreen, moveScreen,
       pan, zoom, canvasRef,
+      activeTool,
     });
 
   // ── Import / export ────────────────────────────────────────────────────────────────
@@ -227,6 +233,7 @@ export default function Drawd() {
     connections, deleteHotspots, deleteConnection, deleteConnectionGroup,
     selectedScreen, removeScreen,
     undo, redo, saveNow, isFileSystemSupported, onSaveAs, onExport, onOpen,
+    setActiveTool,
   });
 
   // ── Paste handler ───────────────────────────────────────────────────────────────
@@ -242,9 +249,10 @@ export default function Drawd() {
 
   // ── Misc callbacks ──────────────────────────────────────────────────────────────────
   const onDragStart = useCallback((e, screenId) => {
+    if (activeTool === "pan") return;
     captureDragSnapshot();
     handleDragStart(e, screenId, screens);
-  }, [handleDragStart, screens, captureDragSnapshot]);
+  }, [handleDragStart, screens, captureDragSnapshot, activeTool]);
 
   const addHotspot = useCallback((screenId) => {
     const screen = screens.find((s) => s.id === screenId);
@@ -396,6 +404,7 @@ export default function Drawd() {
                 onUpdateDescription={updateScreenDescription}
                 onAddState={addState}
                 onDropImage={handleDropImage}
+                activeTool={activeTool}
               />
             ))}
             <ConnectionLines
@@ -447,6 +456,9 @@ export default function Drawd() {
           >
             {Math.round(zoom * 100)}%
           </div>
+
+          {/* Tool switcher */}
+          <ToolBar activeTool={activeTool} onToolChange={setActiveTool} />
         </div>
 
         {selectedScreenData && (

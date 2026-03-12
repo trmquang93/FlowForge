@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
-export function useCanvas() {
+export function useCanvas(activeTool = "select") {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState(null);
@@ -45,6 +45,12 @@ export function useCanvas() {
   }, []);
 
   const handleCanvasMouseDown = useCallback((e) => {
+    // Pan tool: always pan regardless of click target
+    if (activeTool === "pan") {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX, y: e.clientY });
+      return true;
+    }
     if (isSpaceHeld.current) {
       setIsPanning(true);
       setPanStart({ x: e.clientX, y: e.clientY });
@@ -56,7 +62,7 @@ export function useCanvas() {
       return true;
     }
     return false;
-  }, []);
+  }, [activeTool]);
 
   const handleWheel = useCallback((e) => {
     e.preventDefault();

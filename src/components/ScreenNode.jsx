@@ -7,7 +7,7 @@ export function ScreenNode({
   selectedHotspotId, selectedHotspotIds, onHotspotMouseDown, onImageAreaMouseDown,
   onHotspotDragHandleMouseDown,
   onResizeHandleMouseDown, onScreenDimensions, drawRect, isHotspotDragging,
-  onUpdateDescription, isSpaceHeld, onAddState, onDropImage,
+  onUpdateDescription, isSpaceHeld, onAddState, onDropImage, activeTool,
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -42,6 +42,7 @@ export function ScreenNode({
     <div
       onMouseDown={(e) => {
         if (isSpaceHeld?.current) return;
+        if (activeTool === "pan") return;
         if (e.target.closest(".hotspot-area") || e.target.closest(".screen-btn")) return;
         if (e.target.closest(".connection-dot-right")) return;
         if (e.target.closest(".hotspot-drag-handle")) return;

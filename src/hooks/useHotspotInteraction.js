@@ -13,6 +13,7 @@ export function useHotspotInteraction({
   resizeHotspot,
   updateScreenDimensions,
   assignScreenImage,
+  activeTool,
 }) {
   const [hotspotInteraction, setHotspotInteraction] = useState(null);
   const [selectedHotspots, setSelectedHotspots] = useState([]);
@@ -25,6 +26,8 @@ export function useHotspotInteraction({
 
   const onHotspotMouseDown = useCallback((e, screenId, hotspotId) => {
     e.preventDefault();
+    // Pan tool blocks hotspot interactions
+    if (activeTool === "pan") return;
     // Alt/Option + mousedown: immediately start hotspot-drag to connect
     if (e.altKey) {
       const rect = canvasRef.current.getBoundingClientRect();
@@ -68,9 +71,11 @@ export function useHotspotInteraction({
     } else {
       setHotspotInteraction({ mode: "selected", screenId, hotspotId });
     }
-  }, [hotspotInteraction, canvasRef, screens, captureDragSnapshot, pan, zoom, selectedHotspots, setSelectedConnection]);
+  }, [hotspotInteraction, canvasRef, screens, captureDragSnapshot, pan, zoom, selectedHotspots, setSelectedConnection, activeTool]);
 
   const onImageAreaMouseDown = useCallback((e, screenId) => {
+    // Pan tool blocks drawing hotspots
+    if (activeTool === "pan") return;
     if (hotspotInteraction?.mode === "selected") {
       setHotspotInteraction(null);
       return;
@@ -90,7 +95,7 @@ export function useHotspotInteraction({
       imageAreaRect,
       drawRect: null,
     });
-  }, [hotspotInteraction, connecting, screens]);
+  }, [hotspotInteraction, connecting, screens, activeTool]);
 
   const onResizeHandleMouseDown = useCallback((e, screenId, hotspotId, handle) => {
     e.preventDefault();
