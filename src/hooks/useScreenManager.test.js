@@ -259,3 +259,526 @@ describe("useScreenManager undo/redo", () => {
     expect(result.current.canUndo).toBe(undoBefore);
   });
 });
+
+describe("saveHotspot connection management", () => {
+  it("saving hotspot with action='navigate' and targetScreenId creates a connection", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+
+    const hotspot = {
+      id: "hs1", label: "Go", x: 10, y: 10, w: 20, h: 20,
+      action: "navigate", targetScreenId: idB,
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.connections).toHaveLength(1);
+    expect(result.current.connections[0].fromScreenId).toBe(idA);
+    expect(result.current.connections[0].toScreenId).toBe(idB);
+    expect(result.current.connections[0].hotspotId).toBe("hs1");
+    expect(result.current.connections[0].connectionPath).toBe("default");
+  });
+
+  it("saving hotspot with action='modal' and targetScreenId creates a connection", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+
+    const hotspot = {
+      id: "hs1", label: "Open", x: 10, y: 10, w: 20, h: 20,
+      action: "modal", targetScreenId: idB,
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.connections).toHaveLength(1);
+    expect(result.current.connections[0].action).toBe("modal");
+    expect(result.current.connections[0].toScreenId).toBe(idB);
+  });
+
+  it("saving hotspot with action='api' creates success and error connections when both provided", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+
+    const hotspot = {
+      id: "hs1", label: "Fetch", x: 10, y: 10, w: 20, h: 20,
+      action: "api", targetScreenId: null,
+      apiEndpoint: "/api/data", apiMethod: "GET",
+      onSuccessAction: "navigate", onSuccessTargetId: idB,
+      onErrorAction: "navigate", onErrorTargetId: idC,
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.connections).toHaveLength(2);
+    const success = result.current.connections.find((c) => c.connectionPath === "api-success");
+    const error = result.current.connections.find((c) => c.connectionPath === "api-error");
+    expect(success).toBeTruthy();
+    expect(success.toScreenId).toBe(idB);
+    expect(error).toBeTruthy();
+    expect(error.toScreenId).toBe(idC);
+  });
+
+  it("saving hotspot with action='api' with only onSuccessTargetId creates 1 connection", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+
+    const hotspot = {
+      id: "hs1", label: "Fetch", x: 10, y: 10, w: 20, h: 20,
+      action: "api", targetScreenId: null,
+      apiEndpoint: "/api/data", apiMethod: "GET",
+      onSuccessAction: "navigate", onSuccessTargetId: idB,
+      onErrorAction: "", onErrorTargetId: null,
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.connections).toHaveLength(1);
+    expect(result.current.connections[0].connectionPath).toBe("api-success");
+  });
+
+  it("saving hotspot with action='conditional' with 2 conditions creates 2 connections", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+
+    const hotspot = {
+      id: "hs1", label: "Check", x: 10, y: 10, w: 20, h: 20,
+      action: "conditional",
+      conditions: [
+        { id: "c1", label: "logged in", targetScreenId: idB },
+        { id: "c2", label: "guest", targetScreenId: idC },
+      ],
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.connections).toHaveLength(2);
+    expect(result.current.connections[0].connectionPath).toBe("condition-0");
+    expect(result.current.connections[1].connectionPath).toBe("condition-1");
+  });
+
+  it("saving hotspot with action='back' does NOT create a connection", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    const hotspot = {
+      id: "hs1", label: "Back", x: 10, y: 10, w: 20, h: 20,
+      action: "back", targetScreenId: null,
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.connections).toHaveLength(0);
+  });
+
+  it("saving hotspot with action='custom' does NOT create a connection", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    const hotspot = {
+      id: "hs1", label: "Custom", x: 10, y: 10, w: 20, h: 20,
+      action: "custom", targetScreenId: null, customDescription: "do something",
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.connections).toHaveLength(0);
+  });
+
+  it("changing existing hotspot from navigate to back removes the old navigate connection", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+
+    const hotspot = {
+      id: "hs1", label: "Go", x: 10, y: 10, w: 20, h: 20,
+      action: "navigate", targetScreenId: idB,
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.connections).toHaveLength(1);
+
+    const updated = { ...hotspot, action: "back", targetScreenId: null };
+    act(() => result.current.saveHotspot(idA, updated));
+    expect(result.current.connections).toHaveLength(0);
+  });
+});
+
+describe("removeScreen stateGroup cleanup", () => {
+  it("removing one of 3+ screens in a group preserves group on remaining screens", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    act(() => result.current.addState(idA));
+    const idB = result.current.screens[1].id;
+    act(() => result.current.addState(idA));
+    // Now 3 screens in the group
+    expect(result.current.screens).toHaveLength(3);
+    const groupId = result.current.screens[0].stateGroup;
+
+    act(() => result.current.removeScreen(idB));
+    expect(result.current.screens).toHaveLength(2);
+    // Both remaining screens still have the group
+    expect(result.current.screens[0].stateGroup).toBe(groupId);
+    expect(result.current.screens[1].stateGroup).toBe(groupId);
+  });
+
+  it("removing one screen when only 2 in group clears stateGroup on remaining", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    act(() => result.current.addState(idA));
+    const idB = result.current.screens[1].id;
+    expect(result.current.screens).toHaveLength(2);
+    expect(result.current.screens[0].stateGroup).toBeTruthy();
+
+    act(() => result.current.removeScreen(idB));
+    expect(result.current.screens).toHaveLength(1);
+    expect(result.current.screens[0].stateGroup).toBeNull();
+    expect(result.current.screens[0].stateName).toBe("");
+  });
+
+  it("removing a screen removes all connections from/to it", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+
+    act(() => result.current.addConnection(idA, idB));
+    act(() => result.current.addConnection(idC, idB));
+    expect(result.current.connections).toHaveLength(2);
+
+    act(() => result.current.removeScreen(idB));
+    expect(result.current.connections).toHaveLength(0);
+  });
+});
+
+describe("addState", () => {
+  it("new state screen has x = parent.x + 250", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const parentX = result.current.screens[0].x;
+    const idA = result.current.screens[0].id;
+
+    act(() => result.current.addState(idA));
+    expect(result.current.screens[1].x).toBe(parentX + 250);
+  });
+
+  it("new state screen shares stateGroup with parent", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    act(() => result.current.addState(idA));
+    expect(result.current.screens[0].stateGroup).toBeTruthy();
+    expect(result.current.screens[1].stateGroup).toBe(result.current.screens[0].stateGroup);
+  });
+
+  it("parent screen gets stateName='Default' when it had none before", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+    expect(result.current.screens[0].stateName).toBe("");
+
+    act(() => result.current.addState(idA));
+    expect(result.current.screens[0].stateName).toBe("Default");
+  });
+
+  it("calling addState on a screen already in a group reuses existing stateGroup", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    act(() => result.current.addState(idA));
+    const groupId = result.current.screens[0].stateGroup;
+
+    act(() => result.current.addState(idA));
+    expect(result.current.screens).toHaveLength(3);
+    expect(result.current.screens[2].stateGroup).toBe(groupId);
+  });
+});
+
+describe("saveConnectionGroup", () => {
+  it("navigate mode saves connection with fromScreenId, toScreenId, label", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+
+    act(() => result.current.addConnection(idA, idB));
+    const connId = result.current.connections[0].id;
+
+    act(() => result.current.saveConnectionGroup(connId, {
+      mode: "navigate",
+      label: "Next",
+      targetId: idB,
+      fromScreenId: idA,
+    }));
+    expect(result.current.connections).toHaveLength(1);
+    expect(result.current.connections[0].label).toBe("Next");
+    expect(result.current.connections[0].fromScreenId).toBe(idA);
+    expect(result.current.connections[0].toScreenId).toBe(idB);
+  });
+
+  it("conditional mode saves multiple connections with conditionGroupId", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+
+    act(() => result.current.addConnection(idA, idB));
+    const connId = result.current.connections[0].id;
+
+    act(() => result.current.saveConnectionGroup(connId, {
+      mode: "conditional",
+      fromScreenId: idA,
+      conditions: [
+        { label: "yes", targetScreenId: idB },
+        { label: "no", targetScreenId: idC },
+      ],
+    }));
+    // Original replaced with 2 conditional connections
+    expect(result.current.connections).toHaveLength(2);
+    const groupId = result.current.connections[0].conditionGroupId;
+    expect(groupId).toBeTruthy();
+    expect(result.current.connections[1].conditionGroupId).toBe(groupId);
+  });
+
+  it("replacing existing group deletes old connections and creates new ones", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    act(() => result.current.addScreen(null, "D"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+    const idD = result.current.screens[3].id;
+
+    act(() => result.current.addConnection(idA, idB));
+    const connId = result.current.connections[0].id;
+
+    // Create initial conditional group
+    act(() => result.current.saveConnectionGroup(connId, {
+      mode: "conditional",
+      fromScreenId: idA,
+      conditions: [
+        { label: "yes", targetScreenId: idB },
+        { label: "no", targetScreenId: idC },
+      ],
+    }));
+    const groupId = result.current.connections[0].conditionGroupId;
+    expect(result.current.connections).toHaveLength(2);
+
+    // Replace with new conditions
+    act(() => result.current.saveConnectionGroup(null, {
+      mode: "conditional",
+      fromScreenId: idA,
+      conditionGroupId: groupId,
+      conditions: [
+        { label: "a", targetScreenId: idB },
+        { label: "b", targetScreenId: idC },
+        { label: "c", targetScreenId: idD },
+      ],
+    }));
+    expect(result.current.connections).toHaveLength(3);
+    expect(result.current.connections.every((c) => c.conditionGroupId === groupId)).toBe(true);
+  });
+});
+
+describe("convertToConditionalGroup", () => {
+  it("creates two connections with connectionPath='condition-0' and 'condition-1'", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+
+    act(() => result.current.addConnection(idA, idB));
+    const connId = result.current.connections[0].id;
+
+    act(() => result.current.convertToConditionalGroup(connId, idA, idC));
+    expect(result.current.connections).toHaveLength(2);
+    const paths = result.current.connections.map((c) => c.connectionPath).sort();
+    expect(paths).toEqual(["condition-0", "condition-1"]);
+  });
+
+  it("both connections share the same conditionGroupId", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+
+    act(() => result.current.addConnection(idA, idB));
+    const connId = result.current.connections[0].id;
+
+    act(() => result.current.convertToConditionalGroup(connId, idA, idC));
+    const groupId = result.current.connections[0].conditionGroupId;
+    expect(groupId).toBeTruthy();
+    expect(result.current.connections[1].conditionGroupId).toBe(groupId);
+  });
+});
+
+describe("addToConditionalGroup", () => {
+  it("adds new connection with connectionPath='condition-N' where N is max+1", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    act(() => result.current.addScreen(null, "D"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+    const idD = result.current.screens[3].id;
+
+    act(() => result.current.addConnection(idA, idB));
+    const connId = result.current.connections[0].id;
+
+    let groupId;
+    act(() => { groupId = result.current.convertToConditionalGroup(connId, idA, idC); });
+    expect(result.current.connections).toHaveLength(2);
+
+    act(() => result.current.addToConditionalGroup(idA, idD, groupId));
+    expect(result.current.connections).toHaveLength(3);
+    const newConn = result.current.connections[2];
+    expect(newConn.connectionPath).toBe("condition-2");
+  });
+
+  it("new connection joins the existing conditionGroupId", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    act(() => result.current.addScreen(null, "B"));
+    act(() => result.current.addScreen(null, "C"));
+    act(() => result.current.addScreen(null, "D"));
+    const idA = result.current.screens[0].id;
+    const idB = result.current.screens[1].id;
+    const idC = result.current.screens[2].id;
+    const idD = result.current.screens[3].id;
+
+    act(() => result.current.addConnection(idA, idB));
+    const connId = result.current.connections[0].id;
+
+    let groupId;
+    act(() => { groupId = result.current.convertToConditionalGroup(connId, idA, idC); });
+
+    act(() => result.current.addToConditionalGroup(idA, idD, groupId));
+    expect(result.current.connections[2].conditionGroupId).toBe(groupId);
+  });
+});
+
+describe("pasteHotspots", () => {
+  it("pasted hotspots get new IDs (not the originals)", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    const origHotspots = [
+      { id: "orig1", label: "Tap", x: 10, y: 10, w: 20, h: 20, action: "navigate", targetScreenId: "some-id" },
+    ];
+    act(() => result.current.pasteHotspots(idA, origHotspots));
+    const pasted = result.current.screens[0].hotspots;
+    expect(pasted).toHaveLength(1);
+    expect(pasted[0].id).not.toBe("orig1");
+  });
+
+  it("pasted hotspots have x/y offset by +5% (or clamped to bounds)", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    const origHotspots = [
+      { id: "orig1", label: "Tap", x: 10, y: 10, w: 20, h: 20, action: "navigate", targetScreenId: null },
+    ];
+    act(() => result.current.pasteHotspots(idA, origHotspots));
+    const pasted = result.current.screens[0].hotspots[0];
+    expect(pasted.x).toBe(15);
+    expect(pasted.y).toBe(15);
+  });
+
+  it("pasted hotspots have targetScreenId cleared", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    const origHotspots = [
+      { id: "orig1", label: "Tap", x: 10, y: 10, w: 20, h: 20, action: "navigate", targetScreenId: "some-target" },
+    ];
+    act(() => result.current.pasteHotspots(idA, origHotspots));
+    expect(result.current.screens[0].hotspots[0].targetScreenId).toBeNull();
+  });
+});
+
+describe("document CRUD", () => {
+  it("addDocument returns new document ID synchronously", () => {
+    const { result } = setup();
+    let docId;
+    act(() => { docId = result.current.addDocument("API Spec", "content here"); });
+    expect(docId).toBeTruthy();
+    expect(typeof docId).toBe("string");
+    expect(result.current.documents).toHaveLength(1);
+    expect(result.current.documents[0].id).toBe(docId);
+    expect(result.current.documents[0].name).toBe("API Spec");
+  });
+
+  it("updateDocument updates the document name", () => {
+    const { result } = setup();
+    let docId;
+    act(() => { docId = result.current.addDocument("Old Name", "content"); });
+
+    act(() => result.current.updateDocument(docId, { name: "New Name" }));
+    expect(result.current.documents[0].name).toBe("New Name");
+    expect(result.current.documents[0].content).toBe("content");
+  });
+
+  it("deleteDocument removes document from documents array", () => {
+    const { result } = setup();
+    let docId;
+    act(() => { docId = result.current.addDocument("Doc", "content"); });
+    expect(result.current.documents).toHaveLength(1);
+
+    act(() => result.current.deleteDocument(docId));
+    expect(result.current.documents).toHaveLength(0);
+  });
+
+  it("deleteDocument clears documentId on any hotspot that referenced it", () => {
+    const { result } = setup();
+    act(() => result.current.addScreen(null, "A"));
+    const idA = result.current.screens[0].id;
+
+    let docId;
+    act(() => { docId = result.current.addDocument("API Spec", "content"); });
+
+    const hotspot = {
+      id: "hs1", label: "Fetch", x: 10, y: 10, w: 20, h: 20,
+      action: "api", apiEndpoint: "/api", apiMethod: "GET",
+      documentId: docId,
+    };
+    act(() => result.current.saveHotspot(idA, hotspot));
+    expect(result.current.screens[0].hotspots[0].documentId).toBe(docId);
+
+    act(() => result.current.deleteDocument(docId));
+    expect(result.current.screens[0].hotspots[0].documentId).toBeNull();
+    expect(result.current.documents).toHaveLength(0);
+  });
+});

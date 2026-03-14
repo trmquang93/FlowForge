@@ -4,18 +4,18 @@ import { screenReqId, connectionReqId } from "./generateReqIds.js";
 
 // --- Helpers ---
 
-function slugify(name) {
+export function slugify(name) {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
 
-function sortedScreens(screens) {
+export function sortedScreens(screens) {
   return [...screens].sort((a, b) => a.x - b.x || a.y - b.y);
 }
 
-function detectDeviceType(imageWidth, imageHeight) {
+export function detectDeviceType(imageWidth, imageHeight) {
   if (!imageWidth || !imageHeight) return null;
 
   const w = Math.min(imageWidth, imageHeight);
@@ -359,7 +359,7 @@ function generateMainMd(screens, connections, options, navAnalysis, images, docu
   return md;
 }
 
-function mostCommon(arr) {
+export function mostCommon(arr) {
   const counts = {};
   for (const item of arr) {
     counts[item] = (counts[item] || 0) + 1;

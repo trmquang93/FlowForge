@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { computeDrawRect, computeRepositionDelta, computeResize, hitTestScreen } from "../utils/canvasMath.js";
 
 const HEADER_HEIGHT = 37;
 const resizeCursors = {
@@ -97,25 +98,15 @@ export function useCanvasMouseHandlers({
       const { imageAreaRect } = hotspotInteraction;
       if (!imageAreaRect) return;
 
-      const startPctX = ((hotspotInteraction.drawStart.clientX - imageAreaRect.left) / imageAreaRect.width) * 100;
-      const startPctY = ((hotspotInteraction.drawStart.clientY - imageAreaRect.top) / imageAreaRect.height) * 100;
-      const curPctX = ((e.clientX - imageAreaRect.left) / imageAreaRect.width) * 100;
-      const curPctY = ((e.clientY - imageAreaRect.top) / imageAreaRect.height) * 100;
-
-      const x = Math.max(0, Math.min(100, Math.min(startPctX, curPctX)));
-      const y = Math.max(0, Math.min(100, Math.min(startPctY, curPctY)));
-      const x2 = Math.max(0, Math.min(100, Math.max(startPctX, curPctX)));
-      const y2 = Math.max(0, Math.min(100, Math.max(startPctY, curPctY)));
+      const rect = computeDrawRect(
+        { x: hotspotInteraction.drawStart.clientX, y: hotspotInteraction.drawStart.clientY },
+        { x: e.clientX, y: e.clientY },
+        imageAreaRect,
+      );
 
       setHotspotInteraction((prev) => ({
         ...prev,
-        drawRect: {
-          screenId: hotspotInteraction.screenId,
-          x: Math.round(x * 10) / 10,
-          y: Math.round(y * 10) / 10,
-          w: Math.round((x2 - x) * 10) / 10,
-          h: Math.round((y2 - y) * 10) / 10,
-        },
+        drawRect: { screenId: hotspotInteraction.screenId, ...rect },
       }));
       return;
     }
@@ -127,17 +118,16 @@ export function useCanvasMouseHandlers({
       const hs = screen.hotspots.find((h) => h.id === hotspotInteraction.hotspotId);
       if (!hs) return;
 
-      const dxPx = (e.clientX - hotspotInteraction.startClientX) / zoom;
-      const dyPx = (e.clientY - hotspotInteraction.startClientY) / zoom;
-      const dxPct = (dxPx / screenW) * 100;
-      const dyPct = (dyPx / screen.imageHeight) * 100;
+      const { x: newX, y: newY } = computeRepositionDelta(
+        { clientX: hotspotInteraction.startClientX, clientY: hotspotInteraction.startClientY },
+        { clientX: e.clientX, clientY: e.clientY },
+        { width: screenW, height: screen.imageHeight },
+        zoom,
+        hs,
+        { x: hotspotInteraction.startX, y: hotspotInteraction.startY },
+      );
 
-      let newX = hotspotInteraction.startX + dxPct;
-      let newY = hotspotInteraction.startY + dyPct;
-      newX = Math.max(0, Math.min(100 - hs.w, newX));
-      newY = Math.max(0, Math.min(100 - hs.h, newY));
-
-      moveHotspot(hotspotInteraction.screenId, hotspotInteraction.hotspotId, Math.round(newX * 10) / 10, Math.round(newY * 10) / 10);
+      moveHotspot(hotspotInteraction.screenId, hotspotInteraction.hotspotId, newX, newY);
       return;
     }
 
@@ -147,29 +137,16 @@ export function useCanvasMouseHandlers({
       const screenW = screen.width || 220;
       const { handle, startClientX, startClientY, startRect } = hotspotInteraction;
 
-      const dxPct = ((e.clientX - startClientX) / zoom / screenW) * 100;
-      const dyPct = ((e.clientY - startClientY) / zoom / screen.imageHeight) * 100;
+      const resized = computeResize(
+        handle,
+        { clientX: startClientX, clientY: startClientY },
+        { clientX: e.clientX, clientY: e.clientY },
+        { width: screenW, height: screen.imageHeight },
+        zoom,
+        startRect,
+      );
 
-      let { x, y, w, h } = startRect;
-      const MIN = 2;
-
-      if (handle.includes("e")) w = Math.max(MIN, Math.min(100 - x, startRect.w + dxPct));
-      if (handle.includes("w")) {
-        const dx = Math.min(dxPct, startRect.w - MIN);
-        const clampedDx = Math.max(-startRect.x, dx);
-        x = startRect.x + clampedDx;
-        w = startRect.w - clampedDx;
-      }
-      if (handle.includes("s")) h = Math.max(MIN, Math.min(100 - y, startRect.h + dyPct));
-      if (handle.includes("n")) {
-        const dy = Math.min(dyPct, startRect.h - MIN);
-        const clampedDy = Math.max(-startRect.y, dy);
-        y = startRect.y + clampedDy;
-        h = startRect.h - clampedDy;
-      }
-
-      const round = (v) => Math.round(v * 10) / 10;
-      resizeHotspot(hotspotInteraction.screenId, hotspotInteraction.hotspotId, round(x), round(y), round(w), round(h));
+      resizeHotspot(hotspotInteraction.screenId, hotspotInteraction.hotspotId, resized.x, resized.y, resized.w, resized.h);
       return;
     }
 
@@ -204,11 +181,7 @@ export function useCanvasMouseHandlers({
     // Handle connection endpoint drag completion
     if (hotspotInteraction?.mode === "conn-endpoint-drag") {
       const { connectionId, endpoint, mouseX, mouseY } = hotspotInteraction;
-      const hitScreen = screens.find((s) => {
-        const sw = s.width || 220;
-        const sh = (s.imageHeight || 120) + HEADER_HEIGHT;
-        return mouseX >= s.x && mouseX <= s.x + sw && mouseY >= s.y && mouseY <= s.y + sh;
-      });
+      const hitScreen = screens.find((s) => hitTestScreen(mouseX, mouseY, s, HEADER_HEIGHT));
       if (hitScreen) {
         const patch = endpoint === "from" ? { fromScreenId: hitScreen.id } : { toScreenId: hitScreen.id };
         updateConnection(connectionId, patch);
