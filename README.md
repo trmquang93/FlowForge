@@ -8,7 +8,7 @@ When you describe a login flow in prose, AI builds 3 screens instead of 7. The e
 
 Drawd is a visual app flow designer that turns your screen designs into structured, AI-ready build instructions -- complete, unambiguous, and impossible to misinterpret.
 
-**[Try it now →](https://drawd.vercel.app/)**
+**[Try it now →](https://drawd.app/)**
 
 ![Drawd - Visual app flow designer](public/example-flow.png)
 
