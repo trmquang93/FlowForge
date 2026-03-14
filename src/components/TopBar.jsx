@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { COLORS, FONTS, Z_INDEX } from "../styles/theme";
 import { TOPBAR_HEIGHT, ICON_PATH, APP_NAME } from "../constants";
 
-export function TopBar({ screenCount, connectionCount, onUpload, onAddBlank, onExport, onImport, onGenerate, canUndo, canRedo, onUndo, onRedo, connectedFileName, saveStatus, isFileSystemSupported, onNew, onOpen, onSaveAs, onDocuments, documentCount = 0, onDataModels, dataModelCount = 0 }) {
+export function TopBar({ screenCount, connectionCount, onExport, onImport, onGenerate, canUndo, canRedo, onUndo, onRedo, connectedFileName, saveStatus, isFileSystemSupported, onNew, onOpen, onSaveAs, onDocuments, documentCount = 0, onDataModels, dataModelCount = 0 }) {
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const fileMenuRef = useRef(null);
 
@@ -247,41 +247,6 @@ export function TopBar({ screenCount, connectionCount, onUpload, onAddBlank, onE
               {dataModelCount}
             </span>
           )}
-        </button>
-
-        <button
-          onClick={onUpload}
-          style={{
-            padding: "8px 16px",
-            background: COLORS.accent012,
-            border: `1px solid ${COLORS.accent03}`,
-            borderRadius: 8,
-            color: COLORS.accentLight,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: FONTS.mono,
-            transition: "all 0.2s",
-          }}
-        >
-          + Upload Screens
-        </button>
-
-        <button
-          onClick={onAddBlank}
-          style={{
-            padding: "8px 16px",
-            background: "rgba(255,255,255,0.04)",
-            border: `1px solid ${COLORS.border}`,
-            borderRadius: 8,
-            color: COLORS.textMuted,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: FONTS.mono,
-          }}
-        >
-          + Blank Screen
         </button>
 
         {/* File dropdown */}

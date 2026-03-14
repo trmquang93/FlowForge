@@ -458,8 +458,6 @@ export default function Drawd() {
         connectionCount={connections.length}
         documentCount={documents.length}
         dataModelCount={dataModels.length}
-        onUpload={handleImageUpload}
-        onAddBlank={() => addScreenAtCenter()}
         onExport={onExport}
         onImport={onImport}
         onGenerate={onGenerate}
@@ -756,7 +754,19 @@ export default function Drawd() {
           )}
 
           {/* Tool switcher */}
-          <ToolBar activeTool={activeTool} onToolChange={setActiveTool} />
+          <ToolBar
+            activeTool={activeTool}
+            onToolChange={setActiveTool}
+            onUpload={handleImageUpload}
+            onAddBlank={() => addScreenAtCenter()}
+            onAddStickyNote={() => {
+              if (!canvasRef.current) return;
+              const rect = canvasRef.current.getBoundingClientRect();
+              const worldX = (rect.width / 2 - pan.x) / zoom;
+              const worldY = (rect.height / 2 - pan.y) / zoom;
+              addStickyNote(worldX, worldY);
+            }}
+          />
         </div>
 
         {selectedScreenData && (

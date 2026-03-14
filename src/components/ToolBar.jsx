@@ -15,6 +15,33 @@ const PanIcon = () => (
   </svg>
 );
 
+const UploadIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
+    <polyline points="12 7 12 3 8 3" />
+    <line x1="12" y1="3" x2="12" y2="7" />
+    <polyline points="9 6 12 3 15 6" />
+  </svg>
+);
+
+const BlankScreenIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2" />
+    <line x1="9" y1="7" x2="15" y2="7" strokeOpacity="0.5" />
+    <line x1="9" y1="10" x2="15" y2="10" strokeOpacity="0.5" />
+    <line x1="9" y1="13" x2="12" y2="13" strokeOpacity="0.5" />
+  </svg>
+);
+
+const StickyNoteIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8l6-6V4a2 2 0 0 0-2-2z" />
+    <polyline points="14 2 14 8 20 8" />
+  </svg>
+);
+
 const TOOLS = [
   { id: "select", label: "Select", icon: SelectIcon, key: "V" },
   { id: "pan", label: "Pan", icon: PanIcon, key: "H" },
@@ -28,7 +55,41 @@ const dividerStyle = {
   flexShrink: 0,
 };
 
-export function ToolBar({ activeTool, onToolChange }) {
+function ActionButton({ icon: Icon, label, shortcutKey, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      title={`${label} (${shortcutKey})`}
+      style={{
+        width: 36,
+        height: 36,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "transparent",
+        border: "1px solid transparent",
+        borderRadius: 8,
+        color: COLORS.textMuted,
+        cursor: "pointer",
+        transition: "all 0.12s ease",
+        padding: 0,
+        outline: "none",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = COLORS.surfaceHover;
+        e.currentTarget.style.color = COLORS.text;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "transparent";
+        e.currentTarget.style.color = COLORS.textMuted;
+      }}
+    >
+      <Icon />
+    </button>
+  );
+}
+
+export function ToolBar({ activeTool, onToolChange, onUpload, onAddBlank, onAddStickyNote }) {
   return (
     <div
       style={{
@@ -61,10 +122,8 @@ export function ToolBar({ activeTool, onToolChange }) {
                 width: 36,
                 height: 36,
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 2,
                 background: isActive ? COLORS.accent018 : "transparent",
                 border: isActive ? `1px solid ${COLORS.accent}` : "1px solid transparent",
                 borderRadius: 8,
@@ -88,21 +147,16 @@ export function ToolBar({ activeTool, onToolChange }) {
               }}
             >
               <Icon />
-              <span
-                style={{
-                  fontSize: 8,
-                  fontFamily: FONTS.mono,
-                  fontWeight: 600,
-                  color: isActive ? COLORS.accentLight : COLORS.textDim,
-                  lineHeight: 1,
-                }}
-              >
-                {tool.key}
-              </span>
             </button>
           </span>
         );
       })}
+
+      <div style={dividerStyle} />
+
+      <ActionButton icon={UploadIcon} label="Upload Screens" shortcutKey="U" onClick={onUpload} />
+      <ActionButton icon={BlankScreenIcon} label="Add Blank Screen" shortcutKey="B" onClick={onAddBlank} />
+      <ActionButton icon={StickyNoteIcon} label="Add Sticky Note" shortcutKey="N" onClick={onAddStickyNote} />
     </div>
   );
 }
