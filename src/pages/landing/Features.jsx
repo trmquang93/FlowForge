@@ -13,7 +13,7 @@ const Icons = {
   hotspot: (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
       <rect x="4" y="6" width="16" height="12" rx="3" />
-      <rect x="7" y="9" width="5" height="3" rx="1.5" strokeDasharray="0" fill="rgba(124,111,234,0.18)" />
+      <rect x="7" y="9" width="5" height="3" rx="1.5" strokeDasharray="0" fill="rgba(97,175,239,0.18)" />
       <path d="M14 10.5 h3" />
       <path d="M14 12.5 h2" />
     </svg>
@@ -108,9 +108,9 @@ function FeatureCard({ icon, title, description, span, highlight, delay }) {
       style={{
         gridColumn: `span ${span}`,
         background: highlight
-          ? `linear-gradient(135deg, rgba(124,111,234,0.07) 0%, rgba(124,111,234,0.02) 100%)`
+          ? `linear-gradient(135deg, ${L_COLORS.accent007} 0%, rgba(97,175,239,0.02) 100%)`
           : L_COLORS.surfaceCard,
-        border: `1px solid ${highlight ? "rgba(124,111,234,0.2)" : L_COLORS.border}`,
+        border: `1px solid ${highlight ? L_COLORS.accent02 : L_COLORS.border}`,
         borderRadius: 14,
         padding: span === 2 ? "32px 28px" : "28px 24px",
         cursor: "default",
@@ -122,8 +122,8 @@ function FeatureCard({ icon, title, description, span, highlight, delay }) {
           width: 42,
           height: 42,
           borderRadius: 10,
-          background: `rgba(124,111,234,0.12)`,
-          border: `1px solid rgba(124,111,234,0.2)`,
+          background: L_COLORS.accent012,
+          border: `1px solid ${L_COLORS.accent02}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

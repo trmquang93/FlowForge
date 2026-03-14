@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6c5ce7"/>
-      <stop offset="100%" stop-color="#a29bfe"/>
+      <stop offset="0%" stop-color="#61afef"/>
+      <stop offset="100%" stop-color="#8cc5f6"/>
     </linearGradient>
     <linearGradient id="pen-body" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="70%" stop-color="#f0eeff"/>
-      <stop offset="100%" stop-color="#e4e0f8"/>
+      <stop offset="70%" stop-color="#e8f4fd"/>
+      <stop offset="100%" stop-color="#d6ebf8"/>
     </linearGradient>
     <linearGradient id="pen-cone" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ddd8f0"/>
-      <stop offset="100%" stop-color="#c8c2e6"/>
+      <stop offset="0%" stop-color="#d6ebf8"/>
+      <stop offset="100%" stop-color="#bddaf2"/>
     </linearGradient>
     <linearGradient id="tip" x1="0.5" y1="0" x2="0.5" y2="1">
       <stop offset="0%" stop-color="#fdcb6e"/>
@@ -28,8 +28,8 @@
   <rect x="152" y="100" width="48" height="275" rx="24" fill="url(#pen-body)"/>
 
   <!-- Pen clip band (metal ring detail) -->
-  <rect x="148" y="340" width="56" height="12" rx="4" fill="#b8b0d8"/>
-  <rect x="148" y="346" width="56" height="3" rx="1" fill="#a89cc8" opacity="0.6"/>
+  <rect x="148" y="340" width="56" height="12" rx="4" fill="#8cc5f6"/>
+  <rect x="148" y="346" width="56" height="3" rx="1" fill="#61afef" opacity="0.6"/>
 
   <!-- Pen cone (tapered section below grip) -->
   <polygon points="152,352 200,352 188,404 164,404" fill="url(#pen-cone)"/>

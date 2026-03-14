@@ -35,7 +35,7 @@ export function BatchHotspotBar({ count, hasClipboard, onCopy, onPaste, onDelete
 
       <button
         onClick={onCopy}
-        style={{ ...barBtn, background: "rgba(108,92,231,0.15)", color: COLORS.accentLight }}
+        style={{ ...barBtn, background: COLORS.accent015, color: COLORS.accentLight }}
       >
         Copy
       </button>

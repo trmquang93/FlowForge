@@ -41,7 +41,7 @@ const GLOBAL_CSS = `
     inset: 0;
     background-image: radial-gradient(
       circle,
-      rgba(124, 111, 234, 0.10) 1px,
+      rgba(97,175,239,0.10) 1px,
       transparent 1px
     );
     background-size: 28px 28px;
@@ -55,8 +55,8 @@ const GLOBAL_CSS = `
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(124, 111, 234, 0.35) 30%,
-      rgba(232, 160, 69, 0.25) 70%,
+      rgba(97,175,239,0.35) 30%,
+      rgba(209,154,102,0.25) 70%,
       transparent 100%
     );
     margin: 0 auto;
@@ -97,8 +97,8 @@ const GLOBAL_CSS = `
   }
   .btn-ghost:hover {
     color: ${L_COLORS.text};
-    border-color: rgba(124, 111, 234, 0.5);
-    background: rgba(124, 111, 234, 0.06);
+    border-color: rgba(97,175,239,0.5);
+    background: rgba(97,175,239,0.06);
   }
 
   /* ── Feature card hover ─────────────────────── */
@@ -107,8 +107,8 @@ const GLOBAL_CSS = `
   }
   .feature-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(124, 111, 234, 0.14), 0 0 0 1px rgba(124, 111, 234, 0.22);
-    border-color: rgba(124, 111, 234, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(97,175,239,0.14), 0 0 0 1px rgba(97,175,239,0.22);
+    border-color: rgba(97,175,239,0.3) !important;
   }
 
   /* ── Responsive ─────────────────────────────── */

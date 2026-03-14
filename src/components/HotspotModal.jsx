@@ -207,8 +207,8 @@ export function HotspotModal({ screen, hotspot, connection, screens, documents =
             }}
             style={{
               padding: "8px 14px",
-              background: "rgba(108,92,231,0.1)",
-              border: `1px solid rgba(108,92,231,0.25)`,
+              background: COLORS.accent01,
+              border: `1px solid ${COLORS.accent025}`,
               borderRadius: 8,
               color: COLORS.accentLight,
               fontSize: 11,

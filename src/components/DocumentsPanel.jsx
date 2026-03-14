@@ -98,8 +98,8 @@ export function DocumentsPanel({ documents, onAddDocument, onUpdateDocument, onD
                 style={{
                   width: "100%",
                   padding: "7px 12px",
-                  background: "rgba(108,92,231,0.12)",
-                  border: "1px solid rgba(108,92,231,0.3)",
+                  background: COLORS.accent012,
+                  border: `1px solid ${COLORS.accent03}`,
                   borderRadius: 6,
                   color: COLORS.accentLight,
                   fontSize: 12,
@@ -128,7 +128,7 @@ export function DocumentsPanel({ documents, onAddDocument, onUpdateDocument, onD
                     display: "block",
                     textAlign: "left",
                     padding: "10px 14px",
-                    background: selectedDocId === doc.id ? "rgba(108,92,231,0.15)" : "transparent",
+                    background: selectedDocId === doc.id ? COLORS.accent015 : "transparent",
                     border: "none",
                     borderLeft: `3px solid ${selectedDocId === doc.id ? COLORS.accent : "transparent"}`,
                     cursor: "pointer",
@@ -241,8 +241,8 @@ export function DocumentsPanel({ documents, onAddDocument, onUpdateDocument, onD
                   onClick={handleNew}
                   style={{
                     padding: "8px 20px",
-                    background: "rgba(108,92,231,0.12)",
-                    border: "1px solid rgba(108,92,231,0.3)",
+                    background: COLORS.accent012,
+                    border: `1px solid ${COLORS.accent03}`,
                     borderRadius: 8,
                     color: COLORS.accentLight,
                     fontSize: 13,

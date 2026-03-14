@@ -99,7 +99,7 @@ export function DataModelsPanel({ dataModels, onAddModel, onUpdateModel, onDelet
                   style={{
                     padding: "10px 16px",
                     cursor: "pointer",
-                    background: selectedId === m.id ? "rgba(108,92,231,0.15)" : "transparent",
+                    background: selectedId === m.id ? COLORS.accent015 : "transparent",
                     borderLeft: selectedId === m.id ? `3px solid ${COLORS.accent}` : "3px solid transparent",
                     color: selectedId === m.id ? COLORS.accentLight : COLORS.textMuted,
                     fontSize: 12,
@@ -127,8 +127,8 @@ export function DataModelsPanel({ dataModels, onAddModel, onUpdateModel, onDelet
                 style={{
                   width: "100%",
                   padding: "8px 0",
-                  background: "rgba(108,92,231,0.12)",
-                  border: `1px solid rgba(108,92,231,0.3)`,
+                  background: COLORS.accent012,
+                  border: `1px solid ${COLORS.accent03}`,
                   borderRadius: 8,
                   color: COLORS.accentLight,
                   fontSize: 12,

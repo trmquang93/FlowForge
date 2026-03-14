@@ -96,8 +96,8 @@ export function Sidebar({ screen, screens, connections, onClose, onRename, onAdd
         <button
           onClick={onRename}
           style={{
-            background: "rgba(108,92,231,0.1)",
-            border: "1px solid rgba(108,92,231,0.2)",
+            background: COLORS.accent01,
+            border: `1px solid ${COLORS.accent02}`,
             borderRadius: 6,
             color: COLORS.accentLight,
             fontSize: 10,
@@ -210,8 +210,8 @@ export function Sidebar({ screen, screens, connections, onClose, onRename, onAdd
                 alignItems: "center",
                 gap: 4,
                 padding: "2px 8px",
-                background: "rgba(108,92,231,0.12)",
-                border: "1px solid rgba(108,92,231,0.25)",
+                background: COLORS.accent012,
+                border: `1px solid ${COLORS.accent025}`,
                 borderRadius: 12,
                 color: COLORS.accentLight,
                 fontSize: 10,
@@ -498,7 +498,7 @@ export function Sidebar({ screen, screens, connections, onClose, onRename, onAdd
                   onClick={() => onSelectScreen?.(s.id)}
                   style={{
                     padding: "6px 10px",
-                    background: "rgba(108,92,231,0.05)",
+                    background: COLORS.accent005,
                     border: `1px solid ${COLORS.border}`,
                     borderRadius: 6,
                     marginBottom: 4,
@@ -530,8 +530,8 @@ export function Sidebar({ screen, screens, connections, onClose, onRename, onAdd
             width: "100%",
             padding: "6px 0",
             marginTop: 6,
-            background: "rgba(108,92,231,0.08)",
-            border: "1px dashed rgba(108,92,231,0.3)",
+            background: COLORS.accent008,
+            border: `1px dashed ${COLORS.accent03}`,
             borderRadius: 6,
             color: COLORS.accentLight,
             fontSize: 11,
@@ -620,8 +620,8 @@ export function Sidebar({ screen, screens, connections, onClose, onRename, onAdd
           width: "100%",
           padding: "10px 0",
           marginTop: 8,
-          background: "rgba(108,92,231,0.08)",
-          border: "1px dashed rgba(108,92,231,0.3)",
+          background: COLORS.accent008,
+          border: `1px dashed ${COLORS.accent03}`,
           borderRadius: 8,
           color: COLORS.accentLight,
           fontSize: 12,

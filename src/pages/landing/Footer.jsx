@@ -57,7 +57,7 @@ export default function Footer() {
       <div
         style={{
           height: 1,
-          background: `linear-gradient(90deg, transparent 0%, rgba(124,111,234,0.4) 30%, rgba(232,160,69,0.3) 70%, transparent 100%)`,
+          background: `linear-gradient(90deg, transparent 0%, ${L_COLORS.accent04} 30%, ${L_COLORS.amber03} 70%, transparent 100%)`,
         }}
       />
 

@@ -120,7 +120,7 @@ export function ScreenNode({
           : isConnectHoverTarget
             ? `0 0 30px rgba(0,210,211,0.3), 0 8px 32px rgba(0,0,0,0.5)`
             : isScopeRoot
-              ? `0 0 20px rgba(108,92,231,0.4), 0 8px 32px rgba(0,0,0,0.5)`
+              ? `0 0 20px ${COLORS.accent04}, 0 8px 32px rgba(0,0,0,0.5)`
               : selected
                 ? `0 0 30px ${COLORS.accentGlow}, 0 8px 32px rgba(0,0,0,0.5)`
                 : "0 4px 20px rgba(0,0,0,0.4)",
@@ -134,7 +134,7 @@ export function ScreenNode({
       <div
         style={{
           padding: "8px 10px",
-          background: selected ? "rgba(108,92,231,0.1)" : "rgba(255,255,255,0.02)",
+          background: selected ? COLORS.accent01 : "rgba(255,255,255,0.02)",
           borderBottom: `1px solid ${COLORS.border}`,
           display: "flex",
           alignItems: "center",
@@ -162,8 +162,8 @@ export function ScreenNode({
                 fontSize: 9,
                 fontWeight: 500,
                 color: COLORS.accent,
-                background: "rgba(108,92,231,0.15)",
-                border: "1px solid rgba(108,92,231,0.25)",
+                background: COLORS.accent015,
+                border: `1px solid ${COLORS.accent025}`,
                 borderRadius: 4,
                 padding: "1px 5px",
                 marginLeft: 4,
@@ -222,8 +222,8 @@ export function ScreenNode({
               style={{
                 fontSize: 9,
                 color: COLORS.accentLight,
-                background: "rgba(108,92,231,0.2)",
-                border: "1px solid rgba(108,92,231,0.35)",
+                background: COLORS.accent02,
+                border: `1px solid ${COLORS.accent035}`,
                 borderRadius: 4,
                 padding: "1px 5px",
                 fontFamily: FONTS.mono,
@@ -259,8 +259,8 @@ export function ScreenNode({
             onClick={(e) => { e.stopPropagation(); onAddState?.(screen.id); }}
             title="Add screen state variant"
             style={{
-              background: "rgba(108,92,231,0.1)",
-              border: "1px solid rgba(108,92,231,0.2)",
+              background: COLORS.accent01,
+              border: `1px solid ${COLORS.accent02}`,
               borderRadius: 6,
               color: COLORS.accentLight,
               fontSize: 10,
@@ -276,8 +276,8 @@ export function ScreenNode({
             onClick={(e) => { e.stopPropagation(); onAddHotspot(screen.id); }}
             title="Add tap area / button link"
             style={{
-              background: "rgba(108,92,231,0.15)",
-              border: "1px solid rgba(108,92,231,0.3)",
+              background: COLORS.accent015,
+              border: `1px solid ${COLORS.accent03}`,
               borderRadius: 6,
               color: COLORS.accentLight,
               fontSize: 11,
@@ -355,8 +355,8 @@ export function ScreenNode({
                     background: isMultiSelected
                       ? "rgba(254,202,87,0.2)"
                       : isSelected
-                        ? "rgba(108,92,231,0.3)"
-                        : hs.targetScreenId ? "rgba(0,210,211,0.15)" : COLORS.hotspot,
+                        ? COLORS.accent03
+                        : hs.targetScreenId ? "rgba(152,195,121,0.15)" : COLORS.hotspot,
                     border: isMultiSelected
                       ? `2px dashed ${COLORS.warning}`
                       : isSelected
@@ -453,7 +453,7 @@ export function ScreenNode({
                   top: `${drawRect.y}%`,
                   width: `${drawRect.w}%`,
                   height: `${drawRect.h}%`,
-                  background: "rgba(108,92,231,0.2)",
+                  background: COLORS.accent02,
                   border: `2px dashed ${COLORS.accent}`,
                   borderRadius: 6,
                   pointerEvents: "none",
@@ -574,8 +574,8 @@ export function ScreenNode({
                         setIsEditingDesc(false);
                       }}
                       style={{
-                        background: "rgba(108,92,231,0.2)",
-                        border: `1px solid rgba(108,92,231,0.4)`,
+                        background: COLORS.accent02,
+                        border: `1px solid ${COLORS.accent04}`,
                         borderRadius: 4,
                         color: COLORS.accentLight,
                         fontSize: 10,
@@ -616,8 +616,8 @@ export function ScreenNode({
                   setIsEditingDesc(true);
                 }}
                 style={{
-                  background: "rgba(108,92,231,0.1)",
-                  border: `1px dashed rgba(108,92,231,0.3)`,
+                  background: COLORS.accent01,
+                  border: `1px dashed ${COLORS.accent03}`,
                   borderRadius: 8,
                   color: COLORS.accentLight,
                   fontSize: 11,

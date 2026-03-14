@@ -11,44 +11,44 @@ function HeroIllustration() {
         maxWidth: 420,
         height: "auto",
         animation: "breathe 5s ease-in-out infinite",
-        filter: `drop-shadow(0 24px 48px rgba(124, 111, 234, 0.18))`,
+        filter: `drop-shadow(0 24px 48px ${L_COLORS.accent018})`,
       }}
       aria-hidden="true"
     >
       {/* Screen card 1 — left */}
       <rect x="20" y="60" width="110" height="180" rx="14"
-        fill="#17171d" stroke="rgba(124,111,234,0.35)" strokeWidth="1.5" />
+        fill="#17171d" stroke="rgba(97,175,239,0.35)" strokeWidth="1.5" />
       {/* Screen 1 inner image area */}
       <rect x="32" y="72" width="86" height="120" rx="6"
-        fill="rgba(124,111,234,0.08)" stroke="rgba(124,111,234,0.15)" strokeWidth="1" />
+        fill="rgba(97,175,239,0.08)" stroke="rgba(97,175,239,0.15)" strokeWidth="1" />
       {/* Screen 1 hotspot */}
       <rect x="38" y="168" width="52" height="14" rx="4"
-        fill="rgba(124,111,234,0.22)" stroke="rgba(124,111,234,0.5)" strokeWidth="1" />
+        fill="rgba(97,175,239,0.22)" stroke="rgba(97,175,239,0.5)" strokeWidth="1" />
       {/* Screen 1 label */}
       <rect x="32" y="200" width="60" height="6" rx="3" fill="rgba(255,255,255,0.1)" />
       <rect x="32" y="212" width="44" height="5" rx="2.5" fill="rgba(255,255,255,0.06)" />
 
       {/* Screen card 2 — right, slightly higher */}
       <rect x="280" y="30" width="110" height="180" rx="14"
-        fill="#17171d" stroke="rgba(124,111,234,0.35)" strokeWidth="1.5" />
+        fill="#17171d" stroke="rgba(97,175,239,0.35)" strokeWidth="1.5" />
       <rect x="292" y="42" width="86" height="120" rx="6"
-        fill="rgba(124,111,234,0.08)" stroke="rgba(124,111,234,0.15)" strokeWidth="1" />
+        fill="rgba(97,175,239,0.08)" stroke="rgba(97,175,239,0.15)" strokeWidth="1" />
       <rect x="298" y="138" width="52" height="14" rx="4"
-        fill="rgba(232,160,69,0.22)" stroke="rgba(232,160,69,0.5)" strokeWidth="1" />
+        fill="rgba(209,154,102,0.22)" stroke="rgba(209,154,102,0.5)" strokeWidth="1" />
       <rect x="292" y="170" width="60" height="6" rx="3" fill="rgba(255,255,255,0.1)" />
       <rect x="292" y="182" width="44" height="5" rx="2.5" fill="rgba(255,255,255,0.06)" />
 
       {/* Screen card 3 — bottom center, smaller */}
       <rect x="155" y="190" width="100" height="120" rx="12"
-        fill="#17171d" stroke="rgba(124,111,234,0.25)" strokeWidth="1.5" />
+        fill="#17171d" stroke="rgba(97,175,239,0.25)" strokeWidth="1.5" />
       <rect x="165" y="200" width="80" height="70" rx="5"
-        fill="rgba(124,111,234,0.06)" stroke="rgba(124,111,234,0.12)" strokeWidth="1" />
+        fill="rgba(97,175,239,0.06)" stroke="rgba(97,175,239,0.12)" strokeWidth="1" />
       <rect x="165" y="278" width="50" height="5" rx="2.5" fill="rgba(255,255,255,0.08)" />
 
       {/* Connection line: screen 1 -> screen 3 */}
       <path
         d="M 130 150 C 175 150, 160 230, 205 250"
-        stroke="rgba(124,111,234,0.6)"
+        stroke="rgba(97,175,239,0.6)"
         strokeWidth="2"
         strokeDasharray="5 3"
         fill="none"
@@ -56,28 +56,28 @@ function HeroIllustration() {
       {/* Arrow head */}
       <polygon
         points="201,243 209,253 198,257"
-        fill="rgba(124,111,234,0.7)"
+        fill="rgba(97,175,239,0.7)"
       />
 
       {/* Connection line: screen 2 -> screen 3 */}
       <path
         d="M 280 120 C 240 120, 240 200, 255 240"
-        stroke="rgba(232,160,69,0.55)"
+        stroke="rgba(209,154,102,0.55)"
         strokeWidth="2"
         strokeDasharray="5 3"
         fill="none"
       />
       <polygon
         points="251,233 259,243 248,245"
-        fill="rgba(232,160,69,0.65)"
+        fill="rgba(209,154,102,0.65)"
       />
 
       {/* Glow dot at connection origin 1 */}
-      <circle cx="130" cy="150" r="5" fill="rgba(124,111,234,0.8)"
-        style={{ filter: "drop-shadow(0 0 6px rgba(124,111,234,0.9))" }} />
+      <circle cx="130" cy="150" r="5" fill="rgba(97,175,239,0.8)"
+        style={{ filter: "drop-shadow(0 0 6px rgba(97,175,239,0.9))" }} />
       {/* Glow dot at connection origin 2 */}
-      <circle cx="280" cy="120" r="5" fill="rgba(232,160,69,0.8)"
-        style={{ filter: "drop-shadow(0 0 6px rgba(232,160,69,0.9))" }} />
+      <circle cx="280" cy="120" r="5" fill="rgba(209,154,102,0.8)"
+        style={{ filter: "drop-shadow(0 0 6px rgba(209,154,102,0.9))" }} />
     </svg>
   );
 }
@@ -138,7 +138,7 @@ export default function Hero() {
               gap: 8,
               padding: "5px 13px",
               background: L_COLORS.amberDim,
-              border: `1px solid rgba(232, 160, 69, 0.3)`,
+              border: `1px solid ${L_COLORS.amber03}`,
               borderRadius: 100,
               marginBottom: 28,
               animation: "fadeInUp 0.5s ease both",

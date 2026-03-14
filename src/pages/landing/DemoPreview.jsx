@@ -8,7 +8,7 @@ function Callout({ text, style }) {
         position: "absolute",
         ...style,
         background: "rgba(20, 20, 24, 0.92)",
-        border: `1px solid rgba(124, 111, 234, 0.35)`,
+        border: `1px solid ${L_COLORS.accent035}`,
         borderRadius: 6,
         padding: "5px 10px",
         fontFamily: L_FONTS.mono,

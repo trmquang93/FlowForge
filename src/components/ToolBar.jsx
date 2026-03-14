@@ -65,7 +65,7 @@ export function ToolBar({ activeTool, onToolChange }) {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 2,
-                background: isActive ? `rgba(108,92,231,0.18)` : "transparent",
+                background: isActive ? COLORS.accent018 : "transparent",
                 border: isActive ? `1px solid ${COLORS.accent}` : "1px solid transparent",
                 borderRadius: 8,
                 color: isActive ? COLORS.accentLight : COLORS.textMuted,

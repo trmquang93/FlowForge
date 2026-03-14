@@ -89,11 +89,11 @@ export function TopBar({ screenCount, connectionCount, onUpload, onAddBlank, onE
           style={{
             fontSize: 10,
             color: COLORS.textDim,
-            background: "rgba(108,92,231,0.1)",
+            background: COLORS.accent01,
             padding: "3px 8px",
             borderRadius: 4,
             fontFamily: FONTS.mono,
-            border: "1px solid rgba(108,92,231,0.2)",
+            border: `1px solid ${COLORS.accent02}`,
           }}
         >
           App Flow Designer
@@ -204,7 +204,7 @@ export function TopBar({ screenCount, connectionCount, onUpload, onAddBlank, onE
           Documents
           {documentCount > 0 && (
             <span style={{
-              background: "rgba(108,92,231,0.25)",
+              background: COLORS.accent025,
               color: COLORS.accentLight,
               borderRadius: 10,
               fontSize: 10,
@@ -236,7 +236,7 @@ export function TopBar({ screenCount, connectionCount, onUpload, onAddBlank, onE
           Models
           {dataModelCount > 0 && (
             <span style={{
-              background: "rgba(108,92,231,0.25)",
+              background: COLORS.accent025,
               color: COLORS.accentLight,
               borderRadius: 10,
               fontSize: 10,
@@ -252,8 +252,8 @@ export function TopBar({ screenCount, connectionCount, onUpload, onAddBlank, onE
           onClick={onUpload}
           style={{
             padding: "8px 16px",
-            background: "rgba(108,92,231,0.12)",
-            border: "1px solid rgba(108,92,231,0.3)",
+            background: COLORS.accent012,
+            border: `1px solid ${COLORS.accent03}`,
             borderRadius: 8,
             color: COLORS.accentLight,
             fontSize: 12,
@@ -382,7 +382,7 @@ export function TopBar({ screenCount, connectionCount, onUpload, onAddBlank, onE
           style={{
             padding: "8px 16px",
             background: "transparent",
-            border: `1px solid ${screenCount === 0 ? COLORS.border : "rgba(108,92,231,0.4)"}`,
+            border: `1px solid ${screenCount === 0 ? COLORS.border : COLORS.accent04}`,
             borderRadius: 8,
             color: screenCount === 0 ? COLORS.textDim : COLORS.accentLight,
             fontSize: 12,
@@ -401,11 +401,11 @@ export function TopBar({ screenCount, connectionCount, onUpload, onAddBlank, onE
           style={{
             padding: "8px 20px",
             background: screenCount === 0
-              ? "rgba(108,92,231,0.08)"
-              : `linear-gradient(135deg, ${COLORS.accent}, #a29bfe)`,
+              ? COLORS.accent008
+              : `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentLight})`,
             border: "none",
             borderRadius: 8,
-            color: screenCount === 0 ? COLORS.textDim : "#fff",
+            color: screenCount === 0 ? COLORS.textDim : "#282c34",
             fontSize: 12,
             fontWeight: 700,
             cursor: screenCount === 0 ? "not-allowed" : "pointer",

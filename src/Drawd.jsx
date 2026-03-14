@@ -75,7 +75,7 @@ export default function Drawd() {
   const [screenGroups, setScreenGroups] = useState([]);
 
   // ── Screen group callbacks ────────────────────────────────────────────────
-  const addScreenGroup = useCallback((name, screenIds = [], color = "rgba(108,92,231,0.08)") => {
+  const addScreenGroup = useCallback((name, screenIds = [], color = COLORS.accent008) => {
     const group = { id: generateId(), name, screenIds, color, folderHint: "" };
     setScreenGroups((prev) => [...prev, group]);
     return group.id;

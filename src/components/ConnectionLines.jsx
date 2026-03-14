@@ -121,7 +121,7 @@ export function ConnectionLines({
                   y1={fromY}
                   x2={toX}
                   y2={toY}
-                  stroke="rgba(108,92,231,0.25)"
+                  stroke="rgba(97,175,239,0.25)"
                   strokeWidth={1.5}
                   strokeDasharray="6 4"
                 />
@@ -232,8 +232,8 @@ export function ConnectionLines({
                     width={badgeW}
                     height={14}
                     rx={4}
-                    fill="rgba(108,92,231,0.18)"
-                    stroke="rgba(108,92,231,0.35)"
+                    fill="rgba(97,175,239,0.18)"
+                    stroke="rgba(97,175,239,0.35)"
                     strokeWidth={1}
                   />
                   <text

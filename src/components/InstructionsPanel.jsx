@@ -17,7 +17,7 @@ function renderMarkdown(text) {
     line
       .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;border-radius:6px;margin:8px 0" />')
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/`([^`]+)`/g, '<code style="background:rgba(108,92,231,0.12);padding:2px 5px;border-radius:3px;font-size:0.9em">$1</code>');
+      .replace(/`([^`]+)`/g, `<code style="background:${COLORS.accent012};padding:2px 5px;border-radius:3px;font-size:0.9em">$1</code>`);
 
   for (const raw of lines) {
     const line = raw.trimEnd();
@@ -167,8 +167,8 @@ export function InstructionsPanel({ instructions, onClose, isPreview = false }) 
                   onClick={onDownloadZip}
                   style={{
                     padding: "7px 16px",
-                    background: "rgba(0,210,211,0.12)",
-                    border: "1px solid rgba(0,210,211,0.3)",
+                    background: "rgba(152,195,121,0.12)",
+                    border: "1px solid rgba(152,195,121,0.3)",
                     borderRadius: 8,
                     color: COLORS.success,
                     fontSize: 12,
@@ -185,8 +185,8 @@ export function InstructionsPanel({ instructions, onClose, isPreview = false }) 
                 onClick={copyAll}
                 style={{
                   padding: "7px 16px",
-                  background: copied ? "rgba(0,210,211,0.15)" : "rgba(108,92,231,0.15)",
-                  border: `1px solid ${copied ? "rgba(0,210,211,0.3)" : "rgba(108,92,231,0.3)"}`,
+                  background: copied ? "rgba(152,195,121,0.15)" : COLORS.accent015,
+                  border: `1px solid ${copied ? "rgba(152,195,121,0.3)" : COLORS.accent03}`,
                   borderRadius: 8,
                   color: copied ? COLORS.success : COLORS.accentLight,
                   fontSize: 12,

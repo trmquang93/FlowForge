@@ -32,8 +32,8 @@ const Kbd = ({ children }) => (
 
 const TipBox = ({ children }) => (
   <div style={{
-    background: "rgba(124,111,234,0.08)",
-    border: `1px solid rgba(124,111,234,0.2)`,
+    background: L_COLORS.accent008,
+    border: `1px solid ${L_COLORS.accent02}`,
     borderRadius: 8,
     padding: "12px 16px",
     marginBottom: 16,
@@ -47,8 +47,8 @@ const TipBox = ({ children }) => (
 
 const NoteBox = ({ children }) => (
   <div style={{
-    background: "rgba(232,160,69,0.07)",
-    border: `1px solid rgba(232,160,69,0.2)`,
+    background: L_COLORS.amber007,
+    border: `1px solid ${L_COLORS.amber02}`,
     borderRadius: 8,
     padding: "12px 16px",
     marginBottom: 16,

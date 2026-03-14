@@ -292,7 +292,7 @@ export function ScreensPanel({
                 gap: 10,
                 padding: "8px 12px 8px 13px",
                 cursor: "pointer",
-                background: isSelected ? "rgba(108,92,231,0.12)" : "transparent",
+                background: isSelected ? COLORS.accent012 : "transparent",
                 borderLeft: isSelected
                   ? `3px solid ${COLORS.accent}`
                   : "3px solid transparent",
@@ -306,7 +306,7 @@ export function ScreensPanel({
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = isSelected
-                  ? "rgba(108,92,231,0.12)"
+                  ? COLORS.accent012
                   : "transparent";
               }}
             >
@@ -418,8 +418,8 @@ export function ScreensPanel({
                       fontFamily: FONTS.mono,
                       fontWeight: 600,
                       color: COLORS.accentLight,
-                      background: "rgba(108,92,231,0.2)",
-                      border: "1px solid rgba(108,92,231,0.35)",
+                      background: COLORS.accent02,
+                      border: `1px solid ${COLORS.accent035}`,
                     }}
                   >
                     ⊙ root
@@ -503,7 +503,7 @@ export function ScreensPanel({
                   gap: 8,
                   width: "100%",
                   padding: "7px 14px",
-                  background: isCurrent ? "rgba(108,92,231,0.1)" : "none",
+                  background: isCurrent ? COLORS.accent01 : "none",
                   border: "none",
                   color: COLORS.text,
                   cursor: "pointer",

@@ -28,11 +28,11 @@ const DOCS_CSS = `
   }
   .docs-toc-link:hover {
     color: ${L_COLORS.text};
-    background: rgba(124,111,234,0.07);
+    background: rgba(97,175,239,0.07);
   }
   .docs-toc-link.active {
     color: ${L_COLORS.accentLight};
-    background: rgba(124,111,234,0.1);
+    background: rgba(97,175,239,0.1);
     border-left-color: ${L_COLORS.accent};
   }
 
@@ -60,7 +60,7 @@ const DOCS_CSS = `
     font-family: ${L_FONTS.mono};
     font-size: 13px;
     color: ${L_COLORS.accentLight};
-    background: rgba(124,111,234,0.1);
+    background: rgba(97,175,239,0.1);
     border-radius: 4px;
     padding: 1px 5px;
   }

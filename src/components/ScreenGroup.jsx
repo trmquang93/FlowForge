@@ -33,10 +33,10 @@ export function ScreenGroup({ group, screens, onUpdate, onDelete, onMoveScreens 
   const bounds = computeBounds(group.screenIds, screens);
   if (!bounds) return null;
 
-  const color = group.color || "rgba(108,92,231,0.08)";
+  const color = group.color || COLORS.accent008;
   const borderColor = group.color
     ? group.color.replace(/[\d.]+\)$/, "0.4)")
-    : "rgba(108,92,231,0.3)";
+    : COLORS.accent03;
 
   return (
     <div
