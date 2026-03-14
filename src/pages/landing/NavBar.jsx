@@ -1,11 +1,24 @@
 import { L_COLORS, L_FONTS } from "./landingTheme";
 
-function scrollTo(id) {
+function scrollToSection(id) {
   const el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: "smooth" });
 }
 
-export default function NavBar() {
+function navigateToLandingSection(id) {
+  window.location.hash = `#${id}`;
+}
+
+// mode: "landing" | "docs"
+export default function NavBar({ mode = "landing" }) {
+  function handleSectionLink(id) {
+    if (mode === "docs") {
+      navigateToLandingSection(id);
+    } else {
+      scrollToSection(id);
+    }
+  }
+
   return (
     <nav
       style={{
@@ -27,7 +40,10 @@ export default function NavBar() {
       }}
     >
       {/* Logo */}
-      <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer" }}
+        onClick={() => { window.location.hash = ""; window.location.href = "/"; }}
+      >
         <img src="/icon.svg" alt="Drawd" width={26} height={26} />
         <span
           style={{
@@ -53,22 +69,32 @@ export default function NavBar() {
           transform: "translateX(-50%)",
         }}
       >
-        <button className="nav-link" onClick={() => scrollTo("features")}>
+        <button className="nav-link" onClick={() => handleSectionLink("features")}>
           Features
         </button>
-        <button className="nav-link" onClick={() => scrollTo("how-it-works")}>
+        <button className="nav-link" onClick={() => handleSectionLink("how-it-works")}>
           How It Works
         </button>
-        <button className="nav-link" onClick={() => scrollTo("demo")}>
+        <button className="nav-link" onClick={() => handleSectionLink("demo")}>
           Demo
         </button>
+        <a
+          className="nav-link"
+          href="#/docs"
+          style={{
+            color: mode === "docs" ? L_COLORS.accentLight : undefined,
+            fontWeight: mode === "docs" ? 600 : undefined,
+          }}
+        >
+          Docs
+        </a>
       </div>
 
       {/* Right CTA */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <button
           className="btn-ghost"
-          onClick={() => scrollTo("how-it-works")}
+          onClick={() => handleSectionLink("how-it-works")}
         >
           Learn more
         </button>

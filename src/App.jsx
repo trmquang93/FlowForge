@@ -1,12 +1,15 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import LandingPage from "./pages/LandingPage";
+import DocsPage from "./pages/DocsPage";
 import { COLORS } from "./styles/theme";
 
 const Drawd = lazy(() => import("./Drawd"));
 
 function getRoute() {
   const hash = window.location.hash;
-  return hash === "#/editor" ? "editor" : "landing";
+  if (hash === "#/editor") return "editor";
+  if (hash === "#/docs") return "docs";
+  return "landing";
 }
 
 export default function App() {
@@ -44,6 +47,8 @@ export default function App() {
       </Suspense>
     );
   }
+
+  if (route === "docs") return <DocsPage />;
 
   return <LandingPage />;
 }

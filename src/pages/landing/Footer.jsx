@@ -7,7 +7,7 @@ const PRODUCT_LINKS = [
 ];
 
 const RESOURCE_LINKS = [
-  { label: "Docs", href: "#" },
+  { label: "Docs", href: "#/docs" },
   { label: "Changelog", href: "#" },
   { label: "Contact", href: "#" },
 ];
