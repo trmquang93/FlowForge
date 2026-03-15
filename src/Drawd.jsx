@@ -360,7 +360,7 @@ export default function Drawd() {
     canvasSelection, clearSelection, removeScreens, deleteStickyNote, addScreenGroup, screens,
     connections, deleteHotspot, deleteHotspots, deleteConnection, deleteConnectionGroup,
     selectedScreen, removeScreen,
-    selectedStickyNote, setSelectedStickyNote, deleteStickyNote,
+    selectedStickyNote, setSelectedStickyNote,
     selectedScreenGroup, setSelectedScreenGroup, deleteScreenGroup,
     undo, redo, saveNow, isFileSystemSupported, onSaveAs, onExport, onOpen,
     setActiveTool,

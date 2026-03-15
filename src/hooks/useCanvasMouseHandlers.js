@@ -118,7 +118,7 @@ export function useCanvasMouseHandlers({
       startRubberBand(worldX, worldY);
       setSelectedScreen(null);
     }
-  }, [handleCanvasMouseDown, setSelectedScreen, connecting, cancelConnecting, hotspotInteraction, setHotspotInteraction, selectedConnection, setSelectedConnection, isSpaceHeld, conditionalPrompt, onConditionalPromptCancel, editingConditionGroup, setEditingConditionGroup, selectedHotspots, setSelectedHotspots, activeTool, clearSelection, startRubberBand, canvasRef, pan, zoom]);
+  }, [handleCanvasMouseDown, setSelectedScreen, connecting, cancelConnecting, hotspotInteraction, setHotspotInteraction, selectedConnection, setSelectedConnection, isSpaceHeld, conditionalPrompt, onConditionalPromptCancel, editingConditionGroup, setEditingConditionGroup, selectedHotspots, setSelectedHotspots, activeTool, clearSelection, startRubberBand, canvasRef, pan, zoom, setSelectedStickyNote, setSelectedScreenGroup]);
 
   const onCanvasMouseMove = useCallback((e) => {
     if (hotspotInteraction?.mode === "draw") {

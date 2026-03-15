@@ -38,7 +38,6 @@ export function useKeyboardShortcuts({
   removeScreen,
   selectedStickyNote,
   setSelectedStickyNote,
-  deleteStickyNote,
   selectedScreenGroup,
   setSelectedScreenGroup,
   deleteScreenGroup,
