@@ -30,11 +30,18 @@ export function useKeyboardShortcuts({
   screens,
   // data & mutations
   connections,
+  deleteHotspot,
   deleteHotspots,
   deleteConnection,
   deleteConnectionGroup,
   selectedScreen,
   removeScreen,
+  selectedStickyNote,
+  setSelectedStickyNote,
+  deleteStickyNote,
+  selectedScreenGroup,
+  setSelectedScreenGroup,
+  deleteScreenGroup,
   // undo/redo
   undo,
   redo,
@@ -88,6 +95,8 @@ export function useKeyboardShortcuts({
         if (connecting) cancelConnecting();
         if (hotspotInteraction) cancelHotspotInteraction();
         if (selectedConnection) setSelectedConnection(null);
+        if (selectedStickyNote) setSelectedStickyNote(null);
+        if (selectedScreenGroup) setSelectedScreenGroup(null);
       }
 
       if (e.key === "Delete" || e.key === "Backspace") {
@@ -113,6 +122,13 @@ export function useKeyboardShortcuts({
           setSelectedHotspots([]);
           return;
         }
+        // Single selected hotspot delete
+        if (hotspotInteraction?.mode === "selected") {
+          e.preventDefault();
+          deleteHotspot(hotspotInteraction.screenId, hotspotInteraction.hotspotId);
+          cancelHotspotInteraction();
+          return;
+        }
         if (selectedConnection) {
           e.preventDefault();
           const selConn = connections.find((c) => c.id === selectedConnection);
@@ -122,7 +138,21 @@ export function useKeyboardShortcuts({
             deleteConnection(selectedConnection);
           }
           setSelectedConnection(null);
-        } else if (selectedScreen) {
+          return;
+        }
+        if (selectedStickyNote) {
+          e.preventDefault();
+          deleteStickyNote(selectedStickyNote);
+          setSelectedStickyNote(null);
+          return;
+        }
+        if (selectedScreenGroup) {
+          e.preventDefault();
+          deleteScreenGroup(selectedScreenGroup);
+          setSelectedScreenGroup(null);
+          return;
+        }
+        if (selectedScreen) {
           e.preventDefault();
           removeScreen(selectedScreen);
         }
@@ -200,6 +230,8 @@ export function useKeyboardShortcuts({
     showInstructions, showDocuments, showShortcuts, setShowShortcuts, undo, redo,
     saveNow, isFileSystemSupported, onSaveAs, onExport, onOpen,
     conditionalPrompt, editingConditionGroup, selectedHotspots, setSelectedHotspots, deleteHotspots,
-    setActiveTool, canvasSelection, clearSelection, removeScreens, deleteStickyNote, addScreenGroup, screens,
+    deleteHotspot, selectedStickyNote, setSelectedStickyNote, deleteStickyNote,
+    selectedScreenGroup, setSelectedScreenGroup, deleteScreenGroup,
+    setActiveTool, canvasSelection, clearSelection, removeScreens, addScreenGroup, screens,
   ]);
 }

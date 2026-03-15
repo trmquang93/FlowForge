@@ -81,9 +81,11 @@ export default function Drawd() {
 
   // ── Sticky notes ──────────────────────────────────────────────────────────
   const [stickyNotes, setStickyNotes] = useState([]);
+  const [selectedStickyNote, setSelectedStickyNote] = useState(null);
 
   // ── Screen groups ─────────────────────────────────────────────────────────
   const [screenGroups, setScreenGroups] = useState([]);
+  const [selectedScreenGroup, setSelectedScreenGroup] = useState(null);
 
   // ── Screen group callbacks ────────────────────────────────────────────────
   const addScreenGroup = useCallback((name, screenIds = [], color = COLORS.accent008) => {
@@ -338,6 +340,8 @@ export default function Drawd() {
       rubberBand, setCanvasSelection,
       pan, zoom, canvasRef,
       activeTool,
+      setSelectedStickyNote,
+      setSelectedScreenGroup,
     });
 
   // ── Import / export ────────────────────────────────────────────────────────────────
@@ -354,8 +358,10 @@ export default function Drawd() {
     selectedConnection, setSelectedConnection,
     selectedHotspots, setSelectedHotspots,
     canvasSelection, clearSelection, removeScreens, deleteStickyNote, addScreenGroup, screens,
-    connections, deleteHotspots, deleteConnection, deleteConnectionGroup,
+    connections, deleteHotspot, deleteHotspots, deleteConnection, deleteConnectionGroup,
     selectedScreen, removeScreen,
+    selectedStickyNote, setSelectedStickyNote, deleteStickyNote,
+    selectedScreenGroup, setSelectedScreenGroup, deleteScreenGroup,
     undo, redo, saveNow, isFileSystemSupported, onSaveAs, onExport, onOpen,
     setActiveTool,
   });
@@ -576,6 +582,14 @@ export default function Drawd() {
                 screens={screens}
                 onUpdate={updateScreenGroup}
                 onDelete={deleteScreenGroup}
+                selected={selectedScreenGroup === group.id}
+                onSelect={(id) => {
+                  setSelectedScreenGroup(id);
+                  setSelectedStickyNote(null);
+                  setSelectedScreen(null);
+                  setSelectedConnection(null);
+                  setHotspotInteraction(null);
+                }}
               />
             ))}
             {screens.map((screen) => (

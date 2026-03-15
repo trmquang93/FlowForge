@@ -26,6 +26,8 @@ const browserGlobals = {
   TextEncoder: "readonly",
   TextDecoder: "readonly",
   crypto: "readonly",
+  KeyboardEvent: "readonly",
+  MouseEvent: "readonly",
 };
 
 export default [

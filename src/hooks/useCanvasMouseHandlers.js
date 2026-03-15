@@ -54,12 +54,17 @@ export function useCanvasMouseHandlers({
   canvasRef,
   // tool mode
   activeTool,
+  // sticky note / screen group selection clearing
+  setSelectedStickyNote,
+  setSelectedScreenGroup,
 }) {
   const onCanvasMouseDown = useCallback((e) => {
     // Pan tool: always pan, skip all other interactions
     if (activeTool === "pan") {
       if (selectedConnection) setSelectedConnection(null);
       if (selectedHotspots.length > 0) setSelectedHotspots([]);
+      setSelectedStickyNote?.(null);
+      setSelectedScreenGroup?.(null);
       if (hotspotInteraction && hotspotInteraction.mode !== "draw" && hotspotInteraction.mode !== "reposition" && hotspotInteraction.mode !== "hotspot-drag" && hotspotInteraction.mode !== "resize" && hotspotInteraction.mode !== "conn-endpoint-drag") {
         setHotspotInteraction(null);
       }
@@ -87,6 +92,9 @@ export function useCanvasMouseHandlers({
     if (selectedConnection) setSelectedConnection(null);
     // Clear batch hotspot selection
     if (selectedHotspots.length > 0) setSelectedHotspots([]);
+    // Clear sticky note / screen group selection
+    setSelectedStickyNote?.(null);
+    setSelectedScreenGroup?.(null);
     // Cancel hotspot interaction on canvas click
     if (hotspotInteraction && hotspotInteraction.mode !== "draw" && hotspotInteraction.mode !== "reposition" && hotspotInteraction.mode !== "hotspot-drag" && hotspotInteraction.mode !== "resize" && hotspotInteraction.mode !== "conn-endpoint-drag") {
       setHotspotInteraction(null);
