@@ -26,7 +26,7 @@ function computeBounds(groupScreenIds, screens) {
   };
 }
 
-export function ScreenGroup({ group, screens, onUpdate, onDelete, onMoveScreens }) {
+export function ScreenGroup({ group, screens, onUpdate, onDelete, onMoveScreens, selected, onSelect }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [draftName, setDraftName] = useState(group.name);
 
@@ -47,7 +47,9 @@ export function ScreenGroup({ group, screens, onUpdate, onDelete, onMoveScreens 
         width: bounds.width,
         height: bounds.height,
         background: color,
-        border: `1.5px dashed ${borderColor}`,
+        border: selected
+          ? `2px solid ${borderColor.replace(/[\d.]+\)$/, "0.85)")}`
+          : `1.5px dashed ${borderColor}`,
         borderRadius: 14,
         pointerEvents: "none",
         zIndex: Z_INDEX.screenGroup,
@@ -55,6 +57,7 @@ export function ScreenGroup({ group, screens, onUpdate, onDelete, onMoveScreens 
     >
       {/* Label + controls */}
       <div
+        onMouseDown={() => onSelect?.(group.id)}
         style={{
           position: "absolute",
           top: 6,

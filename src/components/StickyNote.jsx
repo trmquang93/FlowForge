@@ -10,7 +10,7 @@ const NOTE_COLORS = {
 
 const COLOR_OPTIONS = ["yellow", "blue", "red", "green"];
 
-export function StickyNote({ note, zoom, onUpdate, onDelete, onDragStart }) {
+export function StickyNote({ note, zoom, onUpdate, onDelete, onDragStart, selected, onSelect }) {
   const [isEditing, setIsEditing] = useState(!note.content);
   const [showMenu, setShowMenu] = useState(false);
   const textareaRef = useRef(null);
@@ -19,8 +19,9 @@ export function StickyNote({ note, zoom, onUpdate, onDelete, onDragStart }) {
   const handleMouseDown = useCallback((e) => {
     if (e.target.closest(".sticky-controls")) return;
     if (e.target.tagName === "TEXTAREA") return;
+    onSelect?.(note.id);
     onDragStart?.(e, note.id);
-  }, [note.id, onDragStart]);
+  }, [note.id, onDragStart, onSelect]);
 
   return (
     <div
@@ -34,7 +35,9 @@ export function StickyNote({ note, zoom, onUpdate, onDelete, onDragStart }) {
         background: colors.bg,
         border: `1.5px solid ${colors.border}`,
         borderRadius: 10,
-        boxShadow: `0 4px 20px rgba(0,0,0,0.5), 0 0 12px ${colors.border}22`,
+        boxShadow: selected
+          ? `0 4px 20px rgba(0,0,0,0.5), 0 0 0 2px ${colors.border}, 0 0 16px ${colors.border}88`
+          : `0 4px 20px rgba(0,0,0,0.5), 0 0 12px ${colors.border}22`,
         cursor: "grab",
         userSelect: "none",
         zIndex: 5,
