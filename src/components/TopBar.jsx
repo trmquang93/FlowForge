@@ -2,6 +2,86 @@ import { useState, useRef, useEffect } from "react";
 import { COLORS, FONTS, Z_INDEX } from "../styles/theme";
 import { TOPBAR_HEIGHT, ICON_PATH, APP_NAME } from "../constants";
 
+function DocumentsIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+  );
+}
+
+function ModelsIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+    </svg>
+  );
+}
+
+function FileMenuIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+}
+
+function TopBarIconButton({ icon: Icon, title, badge, isActive, onClick, style: extraStyle }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "relative",
+        width: 32,
+        height: 32,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: isActive || hovered ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)",
+        border: `1px solid ${isActive ? COLORS.textDim : COLORS.border}`,
+        borderRadius: 6,
+        color: hovered || isActive ? COLORS.text : COLORS.textMuted,
+        cursor: "pointer",
+        transition: "all 0.15s",
+        flexShrink: 0,
+        ...extraStyle,
+      }}
+    >
+      <Icon />
+      {badge > 0 && (
+        <span style={{
+          position: "absolute",
+          top: -4,
+          right: -4,
+          background: COLORS.accent,
+          color: "#282c34",
+          borderRadius: 8,
+          fontSize: 9,
+          fontWeight: 700,
+          fontFamily: FONTS.mono,
+          padding: "1px 4px",
+          lineHeight: 1.4,
+          minWidth: 14,
+          textAlign: "center",
+          pointerEvents: "none",
+        }}>
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
 export function TopBar({ screenCount, connectionCount, onExport, onImport, onGenerate, canUndo, canRedo, onUndo, onRedo, connectedFileName, saveStatus, isFileSystemSupported, onNew, onOpen, onSaveAs, onDocuments, documentCount = 0, onDataModels, dataModelCount = 0 }) {
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const fileMenuRef = useRef(null);
@@ -132,10 +212,9 @@ export function TopBar({ screenCount, connectionCount, onExport, onImport, onGen
         )}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <span style={{ fontSize: 11, color: COLORS.textDim, fontFamily: FONTS.mono }}>
           {screenCount} screen{screenCount !== 1 ? "s" : ""} &middot; {connectionCount} link{connectionCount !== 1 ? "s" : ""}
-          {documentCount > 0 && ` \u00b7 ${documentCount} doc${documentCount !== 1 ? "s" : ""}`}
         </span>
 
         <div style={{ display: "flex", gap: 2 }}>
@@ -185,92 +264,28 @@ export function TopBar({ screenCount, connectionCount, onExport, onImport, onGen
           </button>
         </div>
 
-        <button
+        <TopBarIconButton
+          icon={DocumentsIcon}
+          title="Documents"
+          badge={documentCount}
           onClick={onDocuments}
-          style={{
-            padding: "8px 16px",
-            background: "rgba(255,255,255,0.04)",
-            border: `1px solid ${COLORS.border}`,
-            borderRadius: 8,
-            color: COLORS.textMuted,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: FONTS.mono,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          Documents
-          {documentCount > 0 && (
-            <span style={{
-              background: COLORS.accent025,
-              color: COLORS.accentLight,
-              borderRadius: 10,
-              fontSize: 10,
-              fontWeight: 700,
-              padding: "1px 6px",
-            }}>
-              {documentCount}
-            </span>
-          )}
-        </button>
+        />
 
-        <button
+        <TopBarIconButton
+          icon={ModelsIcon}
+          title="Data Models"
+          badge={dataModelCount}
           onClick={onDataModels}
-          style={{
-            padding: "8px 16px",
-            background: "rgba(255,255,255,0.04)",
-            border: `1px solid ${COLORS.border}`,
-            borderRadius: 8,
-            color: COLORS.textMuted,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: FONTS.mono,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          Models
-          {dataModelCount > 0 && (
-            <span style={{
-              background: COLORS.accent025,
-              color: COLORS.accentLight,
-              borderRadius: 10,
-              fontSize: 10,
-              fontWeight: 700,
-              padding: "1px 6px",
-            }}>
-              {dataModelCount}
-            </span>
-          )}
-        </button>
+        />
 
         {/* File dropdown */}
         <div ref={fileMenuRef} style={{ position: "relative" }}>
-          <button
+          <TopBarIconButton
+            icon={FileMenuIcon}
+            title="File"
+            isActive={fileMenuOpen}
             onClick={() => setFileMenuOpen((v) => !v)}
-            style={{
-              padding: "8px 14px",
-              background: fileMenuOpen ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${fileMenuOpen ? COLORS.textDim : COLORS.border}`,
-              borderRadius: 8,
-              color: COLORS.textMuted,
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-              fontFamily: FONTS.mono,
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-            }}
-          >
-            File
-            <span style={{ fontSize: 9, opacity: 0.7 }}>&#9660;</span>
-          </button>
+          />
 
           {fileMenuOpen && (
             <div
@@ -345,8 +360,9 @@ export function TopBar({ screenCount, connectionCount, onExport, onImport, onGen
         <button
           onClick={onGenerate}
           disabled={screenCount === 0}
+          title="Generate AI Instructions"
           style={{
-            padding: "8px 20px",
+            padding: "8px 16px",
             background: screenCount === 0
               ? COLORS.accent008
               : `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentLight})`,
@@ -362,7 +378,7 @@ export function TopBar({ screenCount, connectionCount, onExport, onImport, onGen
             letterSpacing: "0.02em",
           }}
         >
-          &#9889; Generate AI Instructions
+          &#9889; Generate
         </button>
       </div>
     </div>
