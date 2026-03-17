@@ -33,6 +33,8 @@ import { ToolBar } from "./components/ToolBar";
 import { StickyNote } from "./components/StickyNote";
 import { StickyNoteSidebar } from "./components/StickyNoteSidebar";
 import { ScreenGroup } from "./components/ScreenGroup";
+import { importFlow } from "./utils/importFlow";
+import { detectDrawdFile } from "./utils/detectDrawdFile";
 import { generateId } from "./utils/generateId";
 
 
@@ -163,21 +165,25 @@ export default function Drawd() {
   } = useFilePersistence(screens, connections, pan, zoom, documents, featureBrief, taskLink, techStack, dataModels, stickyNotes, screenGroups);
 
   // ── File actions ───────────────────────────────────────────────────
+  const applyPayload = useCallback((payload) => {
+    replaceAll(payload.screens, payload.connections, payload.screens.length + 1, payload.documents || []);
+    if (payload.viewport) { setPan(payload.viewport.pan); setZoom(payload.viewport.zoom); }
+    setFeatureBrief(payload.metadata?.featureBrief || "");
+    setTaskLink(payload.metadata?.taskLink || "");
+    setTechStack(payload.metadata?.techStack || {});
+    setDataModels(payload.dataModels || []);
+    setStickyNotes(payload.stickyNotes || []);
+    setScreenGroups(payload.screenGroups || []);
+    setScopeRoot(null);
+  }, [replaceAll, setPan, setZoom]);
+
   const onOpen = useCallback(async () => {
     try {
       const payload = await openFile();
       if (!payload) return;
-      replaceAll(payload.screens, payload.connections, payload.screens.length + 1, payload.documents || []);
-      if (payload.viewport) { setPan(payload.viewport.pan); setZoom(payload.viewport.zoom); }
-      setFeatureBrief(payload.metadata?.featureBrief || "");
-      setTaskLink(payload.metadata?.taskLink || "");
-      setTechStack(payload.metadata?.techStack || {});
-      setDataModels(payload.dataModels || []);
-      setStickyNotes(payload.stickyNotes || []);
-      setScreenGroups(payload.screenGroups || []);
-      setScopeRoot(null);
+      applyPayload(payload);
     } catch (err) { alert(err.message); }
-  }, [openFile, replaceAll, setPan, setZoom]);
+  }, [openFile, applyPayload]);
 
   const onSaveAs = useCallback(async () => {
     try { await saveAs(); } catch (err) { alert("Save failed: " + err.message); }
@@ -345,6 +351,30 @@ export default function Drawd() {
   // ── Import / export ────────────────────────────────────────────────────────────────
   const { importConfirm, setImportConfirm, importFileRef, onExport, onImport, onImportFileChange, onImportReplace, onImportMerge } =
     useImportExport({ screens, connections, documents, dataModels, stickyNotes, screenGroups, pan, zoom, featureBrief, taskLink, techStack, replaceAll, mergeAll, setPan, setZoom, setStickyNotes, setScreenGroups });
+
+  // ── Canvas drop (intercepts .drawd files, delegates images) ────────────────────────
+  const onCanvasDrop = useCallback((e) => {
+    e.preventDefault();
+    const drawdFile = detectDrawdFile(e.dataTransfer.files);
+    if (!drawdFile) {
+      handleCanvasDrop(e);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const payload = importFlow(ev.target.result);
+        if (screens.length === 0) {
+          applyPayload(payload);
+        } else {
+          setImportConfirm(payload);
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+    reader.readAsText(drawdFile);
+  }, [screens.length, handleCanvasDrop, applyPayload, setImportConfirm]);
 
   // ── Keyboard shortcuts ──────────────────────────────────────────────────────────────
   useKeyboardShortcuts({
@@ -555,7 +585,7 @@ export default function Drawd() {
           onMouseUp={onCanvasMouseUp}
           onMouseLeave={onCanvasMouseLeave}
           onDragOver={(e) => e.preventDefault()}
-          onDrop={handleCanvasDrop}
+          onDrop={onCanvasDrop}
           onClick={() => { if (groupContextMenu) setGroupContextMenu(null); }}
           onDoubleClick={(e) => {
             if (e.target !== canvasRef.current) return;
