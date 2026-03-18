@@ -420,3 +420,66 @@ Press `?` anywhere on the canvas to open the full keyboard shortcuts panel. The 
 
 > [!NOTE]
 > Keyboard shortcuts are blocked when focus is inside an input or textarea, and when any modal is open.
+
+## Collaboration
+
+Drawd supports real-time collaboration so multiple people can view and edit the same flow simultaneously. The feature uses Supabase Realtime for message relay and presence tracking — no additional server setup required.
+
+### Requirements
+
+Collaboration requires a Supabase project. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to a `.env` file in the project root. See `.env.example` for the format. If these values are not configured, the Share button will show a configuration prompt.
+
+### Creating a room
+
+- Click the Share icon in the top bar (between Data Models and the File dropdown)
+- Enter a display name and choose a cursor color
+- Click "Create Room"
+- A 6-character room code will appear — share it with collaborators
+- You can also copy a direct join link that opens the editor with the room pre-filled
+
+### Joining a room
+
+- Click Share and switch to the "Join" tab, or navigate directly to `https://drawd.app/#/editor?room=CODE`
+- Enter a display name, choose a color, and type the 6-character room code
+- Click "Join Room"
+- The host's current flow will load automatically
+
+### Roles
+
+- **Host** — the person who created the room. The host can change any guest's role by clicking their avatar in the top bar.
+- **Editor** — can edit the canvas; changes sync to all peers in real time.
+- **Viewer** — read-only mode. Canvas panning and zoom remain available, but all editing controls are hidden or disabled.
+
+### Live cursors
+
+Each connected peer's cursor appears on the canvas in real time with their chosen color and display name. The name label fades after 3 seconds of inactivity and reappears when the cursor moves.
+
+### Presence indicators
+
+When connected to a room, the top bar shows:
+- A room code pill (click to copy) with a connection status dot (green = connected, yellow pulse = reconnecting)
+- A "Viewing" badge when in read-only mode
+- Colored avatar circles for each connected peer, with tooltips showing name and role
+- A participant count next to the avatars
+- A leave button to disconnect from the session
+
+### Participants panel
+
+Click the avatar circles area (or the participant count) in the top bar to open the Participants panel on the right side of the screen. The panel shows a full list of everyone in the room:
+
+- Your own entry is always listed first, marked with "(You)" and your role badge
+- Other participants are listed alphabetically with their display name, avatar color, and role
+- As the host, you can change any guest's role directly from the panel using the role dropdown next to their name
+- The panel header shows the total participant count
+
+The panel closes when you click the X button, leave the room, or disconnect from the session.
+
+### Host disconnect
+
+If the host leaves or closes their browser, all guests see a "Session Ended" modal. They can choose to keep the current state and continue working locally, or leave the session.
+
+### Known limitations
+
+- Guest undo is not available — applying remote state clears the undo history.
+- Very large flows with many high-resolution screen images may hit the Supabase broadcast payload limit (~1 MB). Consider using lower-resolution screenshots for collaboration.
+- State sync uses last-write-wins with a 500ms debounce. Rapid changes may appear slightly delayed on guest screens.

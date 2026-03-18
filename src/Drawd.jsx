@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { COLORS, FONTS, FONT_LINK, Z_INDEX } from "./styles/theme";
 import { HEADER_HEIGHT, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, FILE_EXTENSION, LEGACY_FILE_EXTENSION } from "./constants";
 import { generateInstructionFiles } from "./utils/generateInstructionFiles";
@@ -12,6 +12,7 @@ import { useCanvasMouseHandlers } from "./hooks/useCanvasMouseHandlers";
 import { useImportExport } from "./hooks/useImportExport";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useCanvasSelection } from "./hooks/useCanvasSelection";
+import { useCollaboration } from "./hooks/useCollaboration";
 import { ScreenNode } from "./components/ScreenNode";
 import { ConnectionLines } from "./components/ConnectionLines";
 import { HotspotModal } from "./components/HotspotModal";
@@ -36,9 +37,15 @@ import { ScreenGroup } from "./components/ScreenGroup";
 import { importFlow } from "./utils/importFlow";
 import { detectDrawdFile } from "./utils/detectDrawdFile";
 import { generateId } from "./utils/generateId";
+import { ShareModal } from "./components/ShareModal";
+import { CollabPresence } from "./components/CollabPresence";
+import { CollabBadge } from "./components/CollabBadge";
+import { RemoteCursors } from "./components/RemoteCursors";
+import { HostLeftModal } from "./components/HostLeftModal";
+import { ParticipantsPanel } from "./components/ParticipantsPanel";
 
 
-export default function Drawd() {
+export default function Drawd({ initialRoomCode }) {
   // ── Active tool ──────────────────────────────────────────────────────────
   const [activeTool, setActiveTool] = useState("select");
 
@@ -53,7 +60,7 @@ export default function Drawd() {
     fileInputRef, addScreen, addScreenAtCenter, removeScreen, removeScreens, renameScreen, moveScreen, moveScreens,
     handleImageUpload, onFileChange, handlePaste, handleCanvasDrop,
     saveHotspot, deleteHotspot, deleteHotspots, moveHotspot, moveHotspotToScreen, resizeHotspot, updateScreenDimensions,
-    updateScreenDescription, updateScreenNotes, updateScreenTbd, updateScreenRoles, updateScreenCodeRef, updateScreenCriteria, assignScreenImage, quickConnectHotspot,
+    updateScreenDescription, updateScreenNotes, updateScreenTbd, updateScreenRoles, updateScreenCodeRef, updateScreenCriteria, assignScreenImage, patchScreenImage, quickConnectHotspot,
     updateConnection, deleteConnection,
     addConnection, convertToConditionalGroup, addToConditionalGroup, saveConnectionGroup, deleteConnectionGroup,
     addState, updateStateName, addDocument, updateDocument, deleteDocument,
@@ -142,6 +149,70 @@ export default function Drawd() {
   const deleteDataModel = useCallback((id) => {
     setDataModels((prev) => prev.filter((m) => m.id !== id));
   }, []);
+
+  // ── Collaboration ──────────────────────────────────────────────────────────
+  const [showShareModal, setShowShareModal] = useState(!!initialRoomCode);
+  const [showParticipants, setShowParticipants] = useState(false);
+  const pendingRemoteStateRef = useRef(null);
+
+  const screensRef = useRef(screens);
+  useEffect(() => { screensRef.current = screens; }, [screens]);
+
+  const applyRemotePayload = useCallback((payload) => {
+    const incomingScreens = payload.screens || [];
+    // Preserve existing imageData for screens that arrive without it.
+    // buildCollabPayload strips imageData to stay under Supabase's size limit,
+    // so we merge with the guest's current images to avoid flicker.
+    const currentScreens = screensRef.current;
+    const merged = incomingScreens.map((s) => {
+      if (!s.imageData) {
+        const existing = currentScreens.find((e) => e.id === s.id);
+        if (existing?.imageData) {
+          return { ...s, imageData: existing.imageData };
+        }
+      }
+      return s;
+    });
+    replaceAll(
+      merged,
+      payload.connections || [],
+      merged.length + 1,
+      payload.documents || [],
+    );
+    if (payload.featureBrief !== undefined) setFeatureBrief(payload.featureBrief);
+    if (payload.taskLink !== undefined) setTaskLink(payload.taskLink);
+    if (payload.techStack !== undefined) setTechStack(payload.techStack);
+    if (payload.dataModels !== undefined) setDataModels(payload.dataModels);
+    if (payload.stickyNotes !== undefined) setStickyNotes(payload.stickyNotes);
+    if (payload.screenGroups !== undefined) setScreenGroups(payload.screenGroups);
+  }, [replaceAll]);
+
+  const applyPendingRemoteState = useCallback((payload) => {
+    applyRemotePayload(payload);
+  }, [applyRemotePayload]);
+
+  const collab = useCollaboration({
+    screens, connections, documents,
+    featureBrief, taskLink, techStack,
+    dataModels, stickyNotes, screenGroups,
+    applyRemoteState: (payload) => {
+      // If user is mid-drag, queue the update
+      if (dragging || hotspotInteraction?.mode === "draw" || hotspotInteraction?.mode === "reposition" || hotspotInteraction?.mode === "resize") {
+        pendingRemoteStateRef.current = payload;
+        return;
+      }
+      applyRemotePayload(payload);
+    },
+    applyRemoteImage: patchScreenImage,
+    canvasRef, pan, zoom,
+  });
+
+  const isReadOnly = collab.isReadOnly;
+
+  // Auto-close participants panel when disconnecting
+  useEffect(() => {
+    if (!collab.isConnected) setShowParticipants(false);
+  }, [collab.isConnected]);
 
   // BFS forward from scopeRoot following connections
   const scopeScreenIds = scopeRoot ? (() => {
@@ -346,6 +417,9 @@ export default function Drawd() {
       activeTool,
       setSelectedStickyNote,
       setSelectedScreenGroup,
+      isReadOnly,
+      pendingRemoteStateRef,
+      applyPendingRemoteState,
     });
 
   // ── Import / export ────────────────────────────────────────────────────────────────
@@ -380,6 +454,7 @@ export default function Drawd() {
   useKeyboardShortcuts({
     hotspotModal, connectionEditModal, renameModal, importConfirm,
     showInstructions, showDocuments, showShortcuts, setShowShortcuts,
+    showParticipants,
     conditionalPrompt, editingConditionGroup,
     connecting, cancelConnecting,
     hotspotInteraction, cancelHotspotInteraction,
@@ -392,6 +467,7 @@ export default function Drawd() {
     selectedScreenGroup, setSelectedScreenGroup, deleteScreenGroup,
     undo, redo, saveNow, isFileSystemSupported, onSaveAs, onExport, onOpen,
     setActiveTool,
+    isReadOnly,
   });
 
   // ── Paste handler ───────────────────────────────────────────────────────────────
@@ -557,6 +633,25 @@ export default function Drawd() {
         onNew={onNew}
         onOpen={onOpen}
         onSaveAs={onSaveAs}
+        collabState={collab}
+        onShare={() => setShowShareModal(true)}
+        collabBadge={collab.isConnected ? (
+          <CollabBadge
+            roomCode={collab.roomCode}
+            isReadOnly={isReadOnly}
+            isConnected={collab.isConnected}
+            onLeave={collab.leaveRoom}
+          />
+        ) : null}
+        collabPresence={collab.isConnected ? (
+          <CollabPresence
+            peers={collab.peers}
+            isHost={collab.isHost}
+            onSetRole={collab.setPeerRole}
+          />
+        ) : null}
+        onToggleParticipants={() => setShowParticipants((v) => !v)}
+        showParticipants={showParticipants}
       />
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
@@ -575,6 +670,7 @@ export default function Drawd() {
           onTaskLinkChange={setTaskLink}
           techStack={techStack}
           onTechStackChange={setTechStack}
+          isReadOnly={isReadOnly}
         />
 
         {/* Canvas */}
@@ -674,6 +770,7 @@ export default function Drawd() {
                 isMultiSelected={canvasSelection.some((i) => i.type === "screen" && i.id === screen.id)}
                 onToggleSelect={toggleSelection}
                 onMultiDragStart={onMultiDragStart}
+                isReadOnly={isReadOnly}
               />
             ))}
             {stickyNotes.map((note) => (
@@ -750,6 +847,7 @@ export default function Drawd() {
                 onCancel={onConditionalPromptCancel}
               />
             )}
+            {collab.isConnected && <RemoteCursors cursors={collab.remoteCursors} />}
             {editingConditionGroup && (
               <InlineConditionLabels
                 connections={connections}
@@ -883,6 +981,7 @@ export default function Drawd() {
             onToolChange={setActiveTool}
             onUpload={handleImageUpload}
             onAddBlank={() => addScreenAtCenter()}
+            isReadOnly={isReadOnly}
             onAddStickyNote={() => {
               if (!canvasRef.current) return;
               const rect = canvasRef.current.getBoundingClientRect();
@@ -911,6 +1010,7 @@ export default function Drawd() {
             onUpdateCodeRef={updateScreenCodeRef}
             onUpdateCriteria={updateScreenCriteria}
             onUpdateStatus={updateScreenStatus}
+            isReadOnly={isReadOnly}
           />
         )}
 
@@ -1022,7 +1122,48 @@ export default function Drawd() {
         />
       )}
 
+      {showParticipants && collab.isConnected && (
+        <ParticipantsPanel
+          peers={collab.peers}
+          selfDisplayName={collab.selfDisplayName}
+          selfColor={collab.selfColor}
+          selfRole={collab.role}
+          isHost={collab.isHost}
+          onSetRole={collab.setPeerRole}
+          onClose={() => setShowParticipants(false)}
+        />
+      )}
+
       {showShortcuts && <ShortcutsPanel onClose={() => setShowShortcuts(false)} />}
+
+      {showShareModal && (
+        <ShareModal
+          isCollabAvailable={collab.isCollabAvailable}
+          initialRoomCode={initialRoomCode}
+          onCreateRoom={(name, color) => {
+            collab.createRoom(name, color);
+            setShowShareModal(false);
+          }}
+          onJoinRoom={(code, name, color) => {
+            collab.joinRoom(code, name, color);
+            setShowShareModal(false);
+          }}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
+
+      {collab.hostLeft && (
+        <HostLeftModal
+          onKeepState={() => {
+            collab.dismissHostLeft();
+            collab.leaveRoom();
+          }}
+          onLeave={() => {
+            collab.dismissHostLeft();
+            collab.leaveRoom();
+          }}
+        />
+      )}
     </div>
   );
 }

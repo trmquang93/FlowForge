@@ -23,6 +23,7 @@ export const HEADER_HEIGHT = 37;
 export const TOPBAR_HEIGHT = 56;
 export const SIDEBAR_WIDTH = 280;
 export const SCREENS_PANEL_WIDTH = 220;
+export const PARTICIPANTS_PANEL_WIDTH = 260;
 export const BORDER_WIDTH = 2;
 
 // ── Canvas ───────────────────────────────────
@@ -59,6 +60,12 @@ export const COPY_FEEDBACK_MS = 2000;
 
 // ── Validation ───────────────────────────────
 export const DESCRIPTION_MAX_LENGTH = 500;
+
+// ── Collaboration ───────────────────────────
+export const COLLAB_DEBOUNCE_MS = 500;
+export const CURSOR_THROTTLE_MS = 50;
+export const COLLAB_ROOM_CODE_LENGTH = 6;
+export const COLLAB_CURSOR_FADE_MS = 3000;
 
 // ── Sticky Notes ─────────────────────────────
 export const STICKY_NOTE_MIN_WIDTH = 150;
