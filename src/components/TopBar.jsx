@@ -94,7 +94,7 @@ function ShareIcon() {
   );
 }
 
-export function TopBar({ screenCount, connectionCount, onExport, onImport, onGenerate, canUndo, canRedo, onUndo, onRedo, connectedFileName, saveStatus, isFileSystemSupported, onNew, onOpen, onSaveAs, onDocuments, documentCount = 0, onDataModels, dataModelCount = 0, collabState, onShare, collabBadge, collabPresence }) {
+export function TopBar({ screenCount, connectionCount, onExport, onImport, onGenerate, canUndo, canRedo, onUndo, onRedo, connectedFileName, saveStatus, isFileSystemSupported, onNew, onOpen, onSaveAs, onDocuments, documentCount = 0, onDataModels, dataModelCount = 0, collabState, onShare, collabBadge, collabPresence, onToggleParticipants, showParticipants }) {
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const fileMenuRef = useRef(null);
 
@@ -294,7 +294,31 @@ export function TopBar({ screenCount, connectionCount, onExport, onImport, onGen
         {collabState?.isConnected ? (
           <>
             {collabBadge}
-            {collabPresence}
+            <button
+              onClick={onToggleParticipants}
+              title="Participants"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "4px 8px",
+                background: showParticipants ? "rgba(255,255,255,0.08)" : "transparent",
+                border: `1px solid ${showParticipants ? COLORS.textDim : "transparent"}`,
+                borderRadius: 6,
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              {collabPresence}
+              <span style={{
+                fontSize: 10,
+                fontFamily: FONTS.mono,
+                fontWeight: 600,
+                color: COLORS.textMuted,
+              }}>
+                {(collabState.peers?.length || 0) + 1}
+              </span>
+            </button>
           </>
         ) : (
           <TopBarIconButton

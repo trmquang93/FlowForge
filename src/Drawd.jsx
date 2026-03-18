@@ -42,6 +42,7 @@ import { CollabPresence } from "./components/CollabPresence";
 import { CollabBadge } from "./components/CollabBadge";
 import { RemoteCursors } from "./components/RemoteCursors";
 import { HostLeftModal } from "./components/HostLeftModal";
+import { ParticipantsPanel } from "./components/ParticipantsPanel";
 
 
 export default function Drawd({ initialRoomCode }) {
@@ -151,6 +152,7 @@ export default function Drawd({ initialRoomCode }) {
 
   // ── Collaboration ──────────────────────────────────────────────────────────
   const [showShareModal, setShowShareModal] = useState(!!initialRoomCode);
+  const [showParticipants, setShowParticipants] = useState(false);
   const pendingRemoteStateRef = useRef(null);
 
   const screensRef = useRef(screens);
@@ -206,6 +208,11 @@ export default function Drawd({ initialRoomCode }) {
   });
 
   const isReadOnly = collab.isReadOnly;
+
+  // Auto-close participants panel when disconnecting
+  useEffect(() => {
+    if (!collab.isConnected) setShowParticipants(false);
+  }, [collab.isConnected]);
 
   // BFS forward from scopeRoot following connections
   const scopeScreenIds = scopeRoot ? (() => {
@@ -447,6 +454,7 @@ export default function Drawd({ initialRoomCode }) {
   useKeyboardShortcuts({
     hotspotModal, connectionEditModal, renameModal, importConfirm,
     showInstructions, showDocuments, showShortcuts, setShowShortcuts,
+    showParticipants,
     conditionalPrompt, editingConditionGroup,
     connecting, cancelConnecting,
     hotspotInteraction, cancelHotspotInteraction,
@@ -642,6 +650,8 @@ export default function Drawd({ initialRoomCode }) {
             onSetRole={collab.setPeerRole}
           />
         ) : null}
+        onToggleParticipants={() => setShowParticipants((v) => !v)}
+        showParticipants={showParticipants}
       />
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
@@ -1109,6 +1119,18 @@ export default function Drawd({ initialRoomCode }) {
           onReplace={onImportReplace}
           onMerge={onImportMerge}
           onClose={() => setImportConfirm(null)}
+        />
+      )}
+
+      {showParticipants && collab.isConnected && (
+        <ParticipantsPanel
+          peers={collab.peers}
+          selfDisplayName={collab.selfDisplayName}
+          selfColor={collab.selfColor}
+          selfRole={collab.role}
+          isHost={collab.isHost}
+          onSetRole={collab.setPeerRole}
+          onClose={() => setShowParticipants(false)}
         />
       )}
 

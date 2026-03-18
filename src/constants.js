@@ -23,6 +23,7 @@ export const HEADER_HEIGHT = 37;
 export const TOPBAR_HEIGHT = 56;
 export const SIDEBAR_WIDTH = 280;
 export const SCREENS_PANEL_WIDTH = 220;
+export const PARTICIPANTS_PANEL_WIDTH = 260;
 export const BORDER_WIDTH = 2;
 
 // ── Canvas ───────────────────────────────────

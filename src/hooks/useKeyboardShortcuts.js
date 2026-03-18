@@ -10,6 +10,7 @@ export function useKeyboardShortcuts({
   showDocuments,
   showShortcuts,
   setShowShortcuts,
+  showParticipants,
   conditionalPrompt,
   editingConditionGroup,
   // interaction state
@@ -59,7 +60,8 @@ export function useKeyboardShortcuts({
     const onKeyDown = (e) => {
       const anyModalOpen = !!(
         hotspotModal || connectionEditModal || renameModal || importConfirm ||
-        showInstructions || showDocuments || conditionalPrompt || editingConditionGroup || showShortcuts
+        showInstructions || showDocuments || conditionalPrompt || editingConditionGroup || showShortcuts ||
+        showParticipants
       );
 
       // Toggle shortcuts panel with ?
@@ -231,7 +233,7 @@ export function useKeyboardShortcuts({
     connecting, cancelConnecting, hotspotInteraction, cancelHotspotInteraction,
     selectedConnection, setSelectedConnection, connections, deleteConnection, deleteConnectionGroup,
     selectedScreen, removeScreen, hotspotModal, connectionEditModal, renameModal, importConfirm,
-    showInstructions, showDocuments, showShortcuts, setShowShortcuts, undo, redo,
+    showInstructions, showDocuments, showShortcuts, setShowShortcuts, showParticipants, undo, redo,
     saveNow, isFileSystemSupported, onSaveAs, onExport, onOpen,
     conditionalPrompt, editingConditionGroup, selectedHotspots, setSelectedHotspots, deleteHotspots,
     deleteHotspot, selectedStickyNote, setSelectedStickyNote, deleteStickyNote,

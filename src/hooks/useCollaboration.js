@@ -29,6 +29,8 @@ export function useCollaboration({
   const [peers, setPeers] = useState([]);
   const [remoteCursors, setRemoteCursors] = useState([]);
   const [hostLeft, setHostLeft] = useState(false);
+  const [selfDisplayName, setSelfDisplayName] = useState(null);
+  const [selfColor, setSelfColor] = useState(null);
 
   const channelRef = useRef(null);
   const peerIdRef = useRef(generatePeerId());
@@ -36,6 +38,8 @@ export function useCollaboration({
   const debounceTimerRef = useRef(null);
   const cursorThrottleRef = useRef(0);
   const roleRef = useRef(null);
+  const selfDisplayNameRef = useRef(null);
+  const selfColorRef = useRef(null);
   const panRef = useRef(pan);
   const zoomRef = useRef(zoom);
 
@@ -198,6 +202,10 @@ export function useCollaboration({
         setRole("host");
         setIsConnected(true);
         setHostLeft(false);
+        setSelfDisplayName(displayName);
+        setSelfColor(color);
+        selfDisplayNameRef.current = displayName;
+        selfColorRef.current = color;
       }
     });
   }, [setupChannel]);
@@ -227,6 +235,10 @@ export function useCollaboration({
         setRole("editor");
         setIsConnected(true);
         setHostLeft(false);
+        setSelfDisplayName(displayName);
+        setSelfColor(color);
+        selfDisplayNameRef.current = displayName;
+        selfColorRef.current = color;
       }
     });
   }, [setupChannel]);
@@ -247,6 +259,10 @@ export function useCollaboration({
     setPeers([]);
     setRemoteCursors([]);
     setHostLeft(false);
+    setSelfDisplayName(null);
+    setSelfColor(null);
+    selfDisplayNameRef.current = null;
+    selfColorRef.current = null;
   }, []);
 
   const setPeerRole = useCallback((peerId, newRole) => {
@@ -262,14 +278,14 @@ export function useCollaboration({
     setHostLeft(false);
   }, []);
 
-  // State broadcasting (host only, debounced)
+  // State broadcasting (host + editors, debounced)
   useEffect(() => {
-    if (role !== "host" || !channelRef.current || applyingRemoteRef.current) return;
-
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    if (!role || role === "viewer" || !channelRef.current || applyingRemoteRef.current) return;
+
     debounceTimerRef.current = setTimeout(() => {
       const channel = channelRef.current;
-      if (channel && roleRef.current === "host") {
+      if (channel && roleRef.current && roleRef.current !== "viewer") {
         channel.send({
           type: "broadcast",
           event: "state-update",
@@ -322,8 +338,8 @@ export function useCollaboration({
 
       channel.track({
         peerId: peerIdRef.current,
-        displayName: channel._presenceState?.[peerIdRef.current]?.[0]?.displayName || "",
-        color: channel._presenceState?.[peerIdRef.current]?.[0]?.color || "#61afef",
+        displayName: selfDisplayNameRef.current || "",
+        color: selfColorRef.current || "#61afef",
         role: roleRef.current,
         cursorX: worldX,
         cursorY: worldY,
@@ -355,6 +371,8 @@ export function useCollaboration({
     peers,
     remoteCursors,
     hostLeft,
+    selfDisplayName,
+    selfColor,
     isReadOnly: role === "viewer",
     isHost: role === "host",
     isCollabAvailable: !!supabase,

@@ -446,8 +446,8 @@ Collaboration requires a Supabase project. Add `VITE_SUPABASE_URL` and `VITE_SUP
 
 ### Roles
 
-- **Host** — the person who created the room. Only the host broadcasts state changes. The host can change any guest's role by clicking their avatar in the top bar.
-- **Editor** — can view and navigate the canvas but cannot make changes (in this version, only the host's changes are broadcast).
+- **Host** — the person who created the room. The host can change any guest's role by clicking their avatar in the top bar.
+- **Editor** — can edit the canvas; changes sync to all peers in real time.
 - **Viewer** — read-only mode. Canvas panning and zoom remain available, but all editing controls are hidden or disabled.
 
 ### Live cursors
@@ -460,7 +460,19 @@ When connected to a room, the top bar shows:
 - A room code pill (click to copy) with a connection status dot (green = connected, yellow pulse = reconnecting)
 - A "Viewing" badge when in read-only mode
 - Colored avatar circles for each connected peer, with tooltips showing name and role
+- A participant count next to the avatars
 - A leave button to disconnect from the session
+
+### Participants panel
+
+Click the avatar circles area (or the participant count) in the top bar to open the Participants panel on the right side of the screen. The panel shows a full list of everyone in the room:
+
+- Your own entry is always listed first, marked with "(You)" and your role badge
+- Other participants are listed alphabetically with their display name, avatar color, and role
+- As the host, you can change any guest's role directly from the panel using the role dropdown next to their name
+- The panel header shows the total participant count
+
+The panel closes when you click the X button, leave the room, or disconnect from the session.
 
 ### Host disconnect
 
@@ -468,7 +480,6 @@ If the host leaves or closes their browser, all guests see a "Session Ended" mod
 
 ### Known limitations
 
-- Only the host can make changes that are synced to guests. Multi-editor support is planned for a future release.
 - Guest undo is not available — applying remote state clears the undo history.
 - Very large flows with many high-resolution screen images may hit the Supabase broadcast payload limit (~1 MB). Consider using lower-resolution screenshots for collaboration.
 - State sync uses last-write-wins with a 500ms debounce. Rapid changes may appear slightly delayed on guest screens.
