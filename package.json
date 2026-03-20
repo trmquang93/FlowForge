@@ -12,10 +12,16 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@grida/refig": "^0.0.4",
     "@supabase/supabase-js": "^2.99.2",
     "@vercel/analytics": "^2.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "overrides": {
+    "@grida/refig": {
+      "@grida/canvas-wasm": "0.90.0-canary.10"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

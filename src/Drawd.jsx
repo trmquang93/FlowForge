@@ -35,6 +35,7 @@ import { StickyNote } from "./components/StickyNote";
 import { StickyNoteSidebar } from "./components/StickyNoteSidebar";
 import { ScreenGroup } from "./components/ScreenGroup";
 import { importFlow } from "./utils/importFlow";
+import { isFigmaClipboard, extractFigmaData, renderFigmaBuffer } from "./utils/parseFigmaClipboard";
 import { detectDrawdFile } from "./utils/detectDrawdFile";
 import { generateId } from "./utils/generateId";
 import { ShareModal } from "./components/ShareModal";
@@ -149,6 +150,10 @@ export default function Drawd({ initialRoomCode }) {
   const deleteDataModel = useCallback((id) => {
     setDataModels((prev) => prev.filter((m) => m.id !== id));
   }, []);
+
+  // ── Figma paste state ────────────────────────────────────────────────────
+  const [figmaProcessing, setFigmaProcessing] = useState(false);
+  const [figmaError, setFigmaError] = useState(null);
 
   // ── Collaboration ──────────────────────────────────────────────────────────
   const [showShareModal, setShowShareModal] = useState(!!initialRoomCode);
@@ -472,14 +477,52 @@ export default function Drawd({ initialRoomCode }) {
 
   // ── Paste handler ───────────────────────────────────────────────────────────────
   useEffect(() => {
-    const onPaste = (e) => {
+    const onPaste = async (e) => {
       const tag = document.activeElement?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+      // Figma clipboard: detect before regular image paste
+      if (e.clipboardData && isFigmaClipboard(e.clipboardData)) {
+        const html = e.clipboardData.getData("text/html");
+        const figmaData = extractFigmaData(html);
+        if (figmaData) {
+          e.preventDefault();
+          setFigmaProcessing(true);
+          setFigmaError(null);
+          try {
+            const { frameName, imageDataUrl, frameCount } = await renderFigmaBuffer(figmaData.buffer);
+            if (frameCount > 1) {
+              alert("Multiple frames detected. Only the first frame was imported. Please copy and paste one frame at a time for best results.");
+            }
+            addScreenAtCenter(imageDataUrl, frameName, 0, {
+              figmaSource: {
+                fileKey: figmaData.meta.fileKey,
+                frameName,
+                importedAt: new Date().toISOString(),
+              },
+            });
+          } catch (err) {
+            console.error("Figma render failed:", err);
+            setFigmaError(err.message || "Failed to render Figma frame");
+          } finally {
+            setFigmaProcessing(false);
+          }
+          return;
+        }
+      }
+
       handlePaste(e);
     };
     document.addEventListener("paste", onPaste);
     return () => document.removeEventListener("paste", onPaste);
-  }, [handlePaste]);
+  }, [handlePaste, addScreenAtCenter]);
+
+  // ── Figma error auto-dismiss ────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!figmaError) return;
+    const timer = setTimeout(() => setFigmaError(null), 5000);
+    return () => clearTimeout(timer);
+  }, [figmaError]);
 
   // ── Misc callbacks ──────────────────────────────────────────────────────────────────
   const onDragStart = useCallback((e, screenId) => {
@@ -1163,6 +1206,34 @@ export default function Drawd({ initialRoomCode }) {
             collab.leaveRoom();
           }}
         />
+      )}
+
+      {figmaProcessing && (
+        <div style={{
+          position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(0,0,0,0.5)", zIndex: Z_INDEX.modal + 10,
+        }}>
+          <div style={{
+            background: COLORS.bg, color: COLORS.fg, padding: "24px 32px", borderRadius: 12,
+            fontFamily: FONTS.ui, fontSize: 14, textAlign: "center",
+            border: `1px solid ${COLORS.border}`, boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          }}>
+            <div style={{ marginBottom: 12, fontSize: 20 }}>Rendering Figma frame...</div>
+            <div style={{ color: COLORS.fgMuted }}>This may take a moment on first use while the rendering engine loads.</div>
+          </div>
+        </div>
+      )}
+
+      {figmaError && (
+        <div style={{
+          position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
+          background: COLORS.danger, color: "#fff", padding: "10px 20px", borderRadius: 8,
+          fontFamily: FONTS.ui, fontSize: 13, zIndex: Z_INDEX.modal + 10,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.3)", cursor: "pointer",
+          maxWidth: 480,
+        }} onClick={() => setFigmaError(null)}>
+          Figma paste failed: {figmaError}
+        </div>
       )}
     </div>
   );

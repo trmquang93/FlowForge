@@ -25,11 +25,19 @@ Screens are the foundation of every Drawd project. Each screen represents a sing
 - Floating toolbar — Click the Upload icon (`U`) in the bottom toolbar to open a file picker. Select one or more image files (PNG, JPG, WebP).
 - Drag and drop — Drag image files from Finder or Explorer directly onto the canvas.
 - Paste from clipboard — Copy an image (e.g. a screenshot) and press Cmd/Ctrl+V to paste it onto the canvas.
+- Paste from Figma — Copy a frame in Figma and paste directly into Drawd with Cmd/Ctrl+V. The frame is automatically rendered as a screen image using its Figma name.
 - Add blank screen — Click the Blank Screen icon (`B`) in the bottom toolbar to create a placeholder screen without an image.
 
 ### Replacing an image
 
 You can replace the image on an existing screen by pasting from the clipboard or dragging a new image file directly onto it. The screen's hotspots, connections, name, position, and notes are all preserved — only the image is swapped out.
+
+### Paste from Figma
+
+Copy a frame in Figma and paste directly into Drawd (Cmd/Ctrl+V). The frame is automatically rendered as a screen image with its Figma name.
+
+> [!NOTE]
+> For best results, copy one frame at a time. The first render may take a moment as the Figma rendering engine loads.
 
 ### Naming screens
 
