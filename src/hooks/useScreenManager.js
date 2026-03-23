@@ -124,12 +124,13 @@ export function useScreenManager(pan, zoom, canvasRef) {
       tbd: false,
       tbdNote: "",
       roles: [],
+      figmaSource: null,
     };
     setScreens((prev) => [...prev, newScreen]);
     setSelectedScreen(newScreen.id);
   }, [screens, connections, documents, pushHistory, pan, zoom]);
 
-  const addScreenAtCenter = useCallback((imageData = null, name = null, offset = 0) => {
+  const addScreenAtCenter = useCallback((imageData = null, name = null, offset = 0, meta = {}) => {
     pushHistory(screens, connections, documents);
     const count = screenCounter.current++;
     const el = canvasRef?.current;
@@ -155,6 +156,8 @@ export function useScreenManager(pan, zoom, canvasRef) {
       tbd: false,
       tbdNote: "",
       roles: [],
+      figmaSource: null,
+      ...meta,
     };
     setScreens((prev) => [...prev, newScreen]);
     setSelectedScreen(newScreen.id);
@@ -771,6 +774,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
       tbd: false,
       tbdNote: "",
       roles: [],
+      figmaSource: null,
     };
     setScreens((prev) => [...prev, newScreen]);
     setSelectedScreen(newScreen.id);

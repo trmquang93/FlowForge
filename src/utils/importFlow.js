@@ -43,6 +43,7 @@ export function importFlow(fileText) {
     if (screen.tbd === undefined) screen.tbd = false;
     if (screen.tbdNote === undefined) screen.tbdNote = "";
     if (!Array.isArray(screen.roles)) screen.roles = [];
+    if (screen.figmaSource === undefined) screen.figmaSource = null;
     if (Array.isArray(screen.hotspots)) {
       for (const hs of screen.hotspots) {
         if (!hs.elementType) hs.elementType = "button";
