@@ -226,8 +226,22 @@ export async function handleScreenTool(name, args, state, renderer) {
       if (!args.includeImage) {
         delete result.imageData;
         result.hasImage = !!screen.imageData;
+        return result;
       }
-      return result;
+
+      // Return image as a native MCP image content block so multimodal LLMs can see it
+      const imageData = result.imageData;
+      delete result.imageData;
+      result.hasImage = !!imageData;
+
+      const content = [
+        { type: "text", text: JSON.stringify(result, null, 2) },
+      ];
+      if (imageData) {
+        const base64 = imageData.replace(/^data:image\/\w+;base64,/, "");
+        content.push({ type: "image", data: base64, mimeType: "image/png" });
+      }
+      return { __contentBlocks: content };
     }
 
     case "update_screen_image": {

@@ -72,6 +72,9 @@ export function createServer(state, renderer) {
         };
       }
 
+      if (result && result.__contentBlocks) {
+        return { content: result.__contentBlocks };
+      }
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
