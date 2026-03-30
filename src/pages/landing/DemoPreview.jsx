@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { L_COLORS, L_FONTS } from "./landingTheme";
 import { DOMAIN } from "../../constants";
+
+const YOUTUBE_ID = "bYZqbdQo6Oc";
 
 // Floating annotation callouts over the screenshot
 function Callout({ text, style }) {
@@ -27,6 +30,80 @@ function Callout({ text, style }) {
     >
       {text}
     </div>
+  );
+}
+
+function VideoEmbed() {
+  const [playing, setPlaying] = useState(false);
+
+  if (playing) {
+    return (
+      <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_ID}?autoplay=1&rel=0`}
+          title="Drawd Demo"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            border: "none",
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setPlaying(true)}
+      aria-label="Play demo video"
+      style={{
+        display: "block",
+        width: "100%",
+        position: "relative",
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+      }}
+    >
+      <img
+        src={`https://img.youtube.com/vi/${YOUTUBE_ID}/maxresdefault.jpg`}
+        alt="Drawd demo video thumbnail"
+        style={{ display: "block", width: "100%", height: "auto" }}
+      />
+      {/* Play button overlay */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "rgba(0,0,0,0.35)",
+        }}
+      >
+        <div
+          style={{
+            width: 68,
+            height: 68,
+            borderRadius: "50%",
+            background: L_COLORS.accent,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: `0 0 40px ${L_COLORS.accentGlow}`,
+          }}
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+      </div>
+    </button>
   );
 }
 
@@ -149,6 +226,22 @@ export default function DemoPreview() {
           <Callout text="Draw tap areas →" style={{ top: "48%", left: "15%" }} />
           <Callout text="Export to AI ↓" style={{ bottom: "18%", right: "8%" }} />
         </div>
+      </div>
+
+      {/* Video demo */}
+      <div
+        className="reveal"
+        style={{
+          marginTop: 24,
+          borderRadius: 12,
+          overflow: "hidden",
+          border: `1px solid ${L_COLORS.border}`,
+          boxShadow: `0 0 0 1px ${L_COLORS.borderSubtle}, 0 16px 48px rgba(0,0,0,0.5)`,
+          maxWidth: 900,
+          transitionDelay: "180ms",
+        }}
+      >
+        <VideoEmbed />
       </div>
     </section>
   );
