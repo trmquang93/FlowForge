@@ -111,6 +111,17 @@ const GLOBAL_CSS = `
     border-color: rgba(97,175,239,0.3) !important;
   }
 
+  /* ── Nav hamburger (desktop: hidden) ───────── */
+  .nav-hamburger { display: none; }
+
+  /* ── Nav responsive (collapses before links overlap) */
+  @media (max-width: 900px) {
+    .nav-bar { padding: 0 16px !important; }
+    .nav-center { display: none !important; }
+    .nav-right { display: none !important; }
+    .nav-hamburger { display: flex !important; }
+  }
+
   /* ── Responsive ─────────────────────────────── */
   @media (max-width: 768px) {
     .hero-columns {
