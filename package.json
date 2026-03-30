@@ -2,6 +2,8 @@
   "name": "drawd",
   "private": true,
   "version": "1.0.0",
+  "description": "Browser-native visual app flow designer that generates AI build instructions",
+  "keywords": ["app-flow", "navigation-designer", "ai-instructions", "wireframe", "prototyping", "mobile-app", "swiftui", "flutter", "react-native"],
   "type": "module",
   "scripts": {
     "dev": "vite",
