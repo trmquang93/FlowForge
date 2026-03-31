@@ -30,7 +30,7 @@ export function CanvasArea({
   onHotspotDragHandleMouseDown, onResizeHandleMouseDown, onScreenDimensions,
   drawRect, updateScreenDescription, addState, handleDropImage, activeTool,
   scopeRoot, scopeScreenIds, canvasSelection, toggleSelection, onMultiDragStart,
-  isReadOnly,
+  isReadOnly, onFormSummary,
   // Sticky notes
   stickyNotes, selectedStickyNote, updateStickyNote, deleteStickyNote, addStickyNote,
   // Selection overlay
@@ -156,6 +156,7 @@ export function CanvasArea({
             onToggleSelect={toggleSelection}
             onMultiDragStart={onMultiDragStart}
             isReadOnly={isReadOnly}
+            onFormSummary={onFormSummary}
           />
         ))}
         {stickyNotes.map((note) => (

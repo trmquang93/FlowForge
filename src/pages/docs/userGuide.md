@@ -134,6 +134,17 @@ Hold `Shift` and click multiple hotspots on the same screen to select them. Use 
 > [!TIP]
 > Drag from the green handle on the right edge of a selected hotspot directly to another screen to create a connection without opening the modal.
 
+### Form validation summary
+
+When a screen has text-input hotspots, a yellow `Form` button appears in the screen toolbar. Click it to open a read-only panel listing every text-input field on that screen with its validation rules in a table: field name, input type, required status, min/max length, pattern, and error message.
+
+- Fields with no validation rules are highlighted with a warning icon so you can spot incomplete forms at a glance.
+- To edit validation rules, open the hotspot via double-click and expand the Validation section.
+- Generated instructions include a "Form Validation" subsection per screen with all rules formatted as an implementation-ready table.
+
+> [!TIP]
+> Use the Form Summary to audit your form screens before generating instructions. Missing validations are easy to overlook in individual hotspot modals.
+
 ## Connecting Screens
 
 Connections (navigation links) show how a user moves from one screen to another. They appear as curved arrows on the canvas between screen cards.

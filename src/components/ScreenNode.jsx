@@ -12,6 +12,7 @@ export function ScreenNode({
   scopeRoot, isInScope, onContextMenu,
   isMultiSelected, onToggleSelect, onMultiDragStart,
   isReadOnly,
+  onFormSummary,
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -277,6 +278,25 @@ export function ScreenNode({
 
         {/* Action buttons */}
         {!isReadOnly && <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+          {(screen.hotspots || []).some((h) => h.elementType === "text-input") && (
+            <button
+              className="screen-btn"
+              onClick={(e) => { e.stopPropagation(); onFormSummary?.(screen.id); }}
+              title="View form validation summary"
+              style={{
+                background: "rgba(229,192,123,0.1)",
+                border: "1px solid rgba(229,192,123,0.25)",
+                borderRadius: 6,
+                color: COLORS.warning,
+                fontSize: 10,
+                padding: "2px 6px",
+                cursor: "pointer",
+                fontFamily: FONTS.mono,
+              }}
+            >
+              Form
+            </button>
+          )}
           <button
             className="screen-btn"
             onClick={(e) => { e.stopPropagation(); onAddState?.(screen.id); }}

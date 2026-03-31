@@ -157,6 +157,7 @@ export default function Drawd({ initialRoomCode }) {
   const [groupContextMenu, setGroupContextMenu] = useState(null);
   const [renameModal, setRenameModal] = useState(null);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [formSummaryScreen, setFormSummaryScreen] = useState(null);
 
   // ── Instruction generation ─────────────────────────────────────────────
   const { instructions, showInstructions, setShowInstructions, onGenerate, buildInstructionResult } =
@@ -454,6 +455,10 @@ export default function Drawd({ initialRoomCode }) {
           toggleSelection={toggleSelection}
           onMultiDragStart={onMultiDragStart}
           isReadOnly={isReadOnly}
+          onFormSummary={(screenId) => {
+            const s = screens.find((sc) => sc.id === screenId);
+            if (s) setFormSummaryScreen(s);
+          }}
           stickyNotes={stickyNotes}
           selectedStickyNote={selectedStickyNote}
           updateStickyNote={updateStickyNote}
@@ -566,6 +571,8 @@ export default function Drawd({ initialRoomCode }) {
         figmaProcessing={figmaProcessing}
         figmaError={figmaError}
         setFigmaError={setFigmaError}
+        formSummaryScreen={formSummaryScreen}
+        setFormSummaryScreen={setFormSummaryScreen}
       />
     </div>
   );

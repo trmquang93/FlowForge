@@ -471,21 +471,33 @@ function generateScreenDetailMd(s, screens, connections, images, documents = [])
     for (const h of s.hotspots) {
       const actionDetail = renderHotspotDetailBlock(h, screens, documents);
       if (actionDetail) md += actionDetail;
-      if (h.elementType === "text-input" && h.validation) {
+    }
+
+    // Form Validation subsection — consolidated table for all text-input hotspots
+    const textInputs = s.hotspots.filter((h) => h.elementType === "text-input");
+    if (textInputs.length > 0) {
+      md += `#### Form Validation\n\n`;
+      md += `| Field | Input Type | Required | Min Length | Max Length | Pattern | Error Message |\n`;
+      md += `|-------|-----------|----------|-----------|-----------|---------|---------------|\n`;
+      for (const h of textInputs) {
         const v = h.validation;
-        const parts = [];
-        if (v.required) parts.push("required");
-        if (v.inputType && v.inputType !== "text") parts.push(`type: ${v.inputType}`);
-        if (v.minLength != null) parts.push(`min: ${v.minLength} chars`);
-        if (v.maxLength != null) parts.push(`max: ${v.maxLength} chars`);
-        if (v.pattern) parts.push(`pattern: "${v.pattern}"`);
-        if (parts.length > 0) {
-          md += `**${h.label || "Unnamed"}** (text-input) \u2014 ${parts.join(", ")}\n`;
-          if (v.errorMessage) {
-            md += `  Validation error: "${v.errorMessage}"\n`;
-          }
-          md += `\n`;
-        }
+        const name = h.label || "Unnamed";
+        const inputType = v?.inputType || "text";
+        const req = v?.required ? "Yes" : "No";
+        const min = v?.minLength != null ? String(v.minLength) : "\u2014";
+        const max = v?.maxLength != null ? String(v.maxLength) : "\u2014";
+        const pattern = v?.pattern ? `\`${v.pattern}\`` : "\u2014";
+        const errMsg = v?.errorMessage || "\u2014";
+        const warn = !v || !(v.required || (v.inputType && v.inputType !== "text") || v.minLength != null || v.maxLength != null || v.pattern || v.errorMessage) ? " \u26A0\uFE0F" : "";
+        md += `| ${name}${warn} | ${inputType} | ${req} | ${min} | ${max} | ${pattern} | ${errMsg} |\n`;
+      }
+      md += `\n`;
+      const missing = textInputs.filter((h) => {
+        const v = h.validation;
+        return !v || !(v.required || (v.inputType && v.inputType !== "text") || v.minLength != null || v.maxLength != null || v.pattern || v.errorMessage);
+      });
+      if (missing.length > 0) {
+        md += `> **Note:** ${missing.length} field(s) marked with \u26A0\uFE0F have no validation rules configured.\n\n`;
       }
     }
   } else {

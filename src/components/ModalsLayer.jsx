@@ -10,6 +10,7 @@ import { ParticipantsPanel } from "./ParticipantsPanel";
 import { ShortcutsPanel } from "./ShortcutsPanel";
 import { ShareModal } from "./ShareModal";
 import { HostLeftModal } from "./HostLeftModal";
+import { FormSummaryPanel } from "./FormSummaryPanel";
 
 export function ModalsLayer({
   // Hotspot modal
@@ -40,6 +41,8 @@ export function ModalsLayer({
   showShareModal, setShowShareModal, initialRoomCode,
   // Figma
   figmaProcessing, figmaError, setFigmaError,
+  // Form summary
+  formSummaryScreen, setFormSummaryScreen,
 }) {
   return (
     <>
@@ -207,6 +210,13 @@ export function ModalsLayer({
         }} onClick={() => setFigmaError(null)}>
           Figma paste failed: {figmaError}
         </div>
+      )}
+
+      {formSummaryScreen && (
+        <FormSummaryPanel
+          screen={formSummaryScreen}
+          onClose={() => setFormSummaryScreen(null)}
+        />
       )}
     </>
   );
