@@ -841,9 +841,10 @@ export function HotspotModal({ screen, hotspot, connection, screens, documents =
                             key={trait}
                             type="button"
                             onClick={() => {
-                              setA11yTraits(isActive
-                                ? a11yTraits.filter((t) => t !== trait)
-                                : [...a11yTraits, trait]
+                              setA11yTraits((prev) =>
+                                prev.includes(trait)
+                                  ? prev.filter((t) => t !== trait)
+                                  : [...prev, trait]
                               );
                             }}
                             style={{

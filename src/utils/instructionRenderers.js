@@ -100,6 +100,7 @@ export const PLATFORM_TERMINOLOGY = {
 export const ACCESSIBILITY_PLATFORM_MAP = {
   swiftui: {
     name: "SwiftUI",
+    docsUrl: "https://developer.apple.com/accessibility/",
     label: `.accessibilityLabel("text")`,
     hint: `.accessibilityHint("text")`,
     roles: {
@@ -129,6 +130,7 @@ export const ACCESSIBILITY_PLATFORM_MAP = {
   },
   "react-native": {
     name: "React Native",
+    docsUrl: "https://reactnative.dev/docs/accessibility",
     label: `accessibilityLabel="text"`,
     hint: `accessibilityHint="text"`,
     roles: {
@@ -158,6 +160,7 @@ export const ACCESSIBILITY_PLATFORM_MAP = {
   },
   flutter: {
     name: "Flutter",
+    docsUrl: "https://docs.flutter.dev/ui/accessibility-and-internationalization/accessibility",
     label: `Semantics(label: "text")`,
     hint: `Semantics(hint: "text")`,
     roles: {
@@ -187,6 +190,7 @@ export const ACCESSIBILITY_PLATFORM_MAP = {
   },
   "jetpack-compose": {
     name: "Jetpack Compose",
+    docsUrl: "https://developer.android.com/jetpack/compose/accessibility",
     label: `Modifier.semantics { contentDescription = "text" }`,
     hint: `Modifier.semantics { stateDescription = "text" }`,
     roles: {
@@ -361,7 +365,7 @@ export function renderBuildGuideActionTable(platform) {
 
 // Render an #### Accessibility subsection for hotspots that have accessibility annotations.
 // Returns null when no hotspot has accessibility data.
-export function renderAccessibilityBlock(hotspots, _platform) {
+export function renderAccessibilityBlock(hotspots) {
   const a11yHotspots = (hotspots || []).filter((h) => h.accessibility);
   if (a11yHotspots.length === 0) return null;
 
@@ -413,7 +417,7 @@ export function renderAccessibilityGuidance(platform) {
   }
 
   md += `\n`;
-  md += `> For the full role and trait mapping, refer to the [${pm.name} accessibility documentation](https://developer.apple.com/accessibility/).\n\n`;
+  md += `> For the full role and trait mapping, refer to the [${pm.name} accessibility documentation](${pm.docsUrl}).\n\n`;
 
   return md;
 }

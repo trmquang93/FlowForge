@@ -214,7 +214,7 @@ describe("renderAccessibilityBlock", () => {
       { label: "Button", action: "navigate", accessibility: null },
       { label: "Link", action: "navigate" },
     ];
-    expect(renderAccessibilityBlock(hotspots, "auto")).toBeNull();
+    expect(renderAccessibilityBlock(hotspots)).toBeNull();
   });
 
   it("returns null for an empty hotspots array", () => {
@@ -227,7 +227,7 @@ describe("renderAccessibilityBlock", () => {
       action: "navigate",
       accessibility: { label: "Sign in", role: "button", hint: "Double tap to sign in", traits: [] },
     }];
-    const result = renderAccessibilityBlock(hotspots, "auto");
+    const result = renderAccessibilityBlock(hotspots);
     expect(result).toContain("#### Accessibility");
     expect(result).toContain("Element");
     expect(result).toContain("A11y Label");
@@ -242,7 +242,7 @@ describe("renderAccessibilityBlock", () => {
       action: "api",
       accessibility: { label: "Submit form", role: "button", hint: "Sends data", traits: ["selected", "disabled"] },
     }];
-    const result = renderAccessibilityBlock(hotspots, "auto");
+    const result = renderAccessibilityBlock(hotspots);
     expect(result).toContain("Submit");
     expect(result).toContain("Submit form");
     expect(result).toContain("button");
@@ -257,7 +257,7 @@ describe("renderAccessibilityBlock", () => {
       action: "navigate",
       accessibility: { label: "", role: "", hint: "", traits: [] },
     }];
-    const result = renderAccessibilityBlock(hotspots, "auto");
+    const result = renderAccessibilityBlock(hotspots);
     expect(result).toContain("\u2014");
   });
 
@@ -267,7 +267,7 @@ describe("renderAccessibilityBlock", () => {
       { label: "B", action: "navigate", accessibility: null },
       { label: "C", action: "navigate" },
     ];
-    const result = renderAccessibilityBlock(hotspots, "auto");
+    const result = renderAccessibilityBlock(hotspots);
     expect(result).toContain("Accessible A");
     expect(result).not.toContain("| B |");
     expect(result).not.toContain("| C |");

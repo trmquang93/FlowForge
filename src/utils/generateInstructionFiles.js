@@ -503,7 +503,7 @@ function generateScreenDetailMd(s, screens, connections, images, documents = [])
     }
 
     // Accessibility subsection
-    const a11yBlock = renderAccessibilityBlock(s.hotspots, "auto");
+    const a11yBlock = renderAccessibilityBlock(s.hotspots);
     if (a11yBlock) md += a11yBlock;
   } else {
     md += `*No interactive elements defined*\n\n`;
