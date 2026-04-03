@@ -15,7 +15,7 @@ export function Toast({ message }) {
       color: COLORS.text,
       fontFamily: FONTS.mono,
       fontSize: 13,
-      zIndex: Z_INDEX.contextMenu + 1,
+      zIndex: Z_INDEX.toast,
       boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
       pointerEvents: "none",
     }}>

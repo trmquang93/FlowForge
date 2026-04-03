@@ -1,4 +1,4 @@
-import { GRID_COLUMNS, GRID_COL_WIDTH, GRID_ROW_HEIGHT, DROP_OVERLAP_MARGIN } from "../constants";
+import { GRID_COLUMNS, GRID_COL_WIDTH, GRID_ROW_HEIGHT, GRID_MARGIN, DROP_OVERLAP_MARGIN } from "../constants";
 import { rectsIntersect } from "./canvasMath";
 
 /**
@@ -22,10 +22,10 @@ export function filenameToScreenName(filename) {
  * @param {number[]} heights - height of each item
  * @param {number} originX
  * @param {number} originY
- * @param {number} rowGap - vertical spacing between rows (default 60)
+ * @param {number} rowGap - vertical spacing between rows (default GRID_MARGIN)
  * @returns {Array<{x, y}>}
  */
-export function gridPositions(heights, originX, originY, rowGap = 60) {
+export function gridPositions(heights, originX, originY, rowGap = GRID_MARGIN) {
   const positions = [];
   let rowY = originY;
   let rowMaxHeight = 0;

@@ -284,6 +284,9 @@ export default function Drawd({ initialRoomCode }) {
     setToast(message);
     toastTimerRef.current = setTimeout(() => setToast(null), duration);
   }, []);
+  useEffect(() => {
+    return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
+  }, []);
 
   // ── Drag-over state (drop zone overlay) ───────────────────────────────────────────
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -307,13 +310,13 @@ export default function Drawd({ initialRoomCode }) {
     const drawdFile = detectDrawdFile(e.dataTransfer.files);
     if (!drawdFile) {
       const imageFiles = Array.from(e.dataTransfer.files).filter(
-        (f) => f.type === "image/png" || f.type === "image/jpeg"
+        (f) => f.type.startsWith("image/")
       );
       if (imageFiles.length === 0) return;
       const rect = canvasRef.current.getBoundingClientRect();
       const worldX = (e.clientX - rect.left - pan.x) / zoom;
       const worldY = (e.clientY - rect.top - pan.y) / zoom;
-      handleCanvasDrop(e, worldX, worldY);
+      handleCanvasDrop(imageFiles, worldX, worldY);
       showToast(`Created ${imageFiles.length} screen${imageFiles.length > 1 ? "s" : ""} from dropped images`);
       return;
     }

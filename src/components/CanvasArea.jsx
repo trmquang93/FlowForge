@@ -98,7 +98,7 @@ export function CanvasArea({
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(97,175,239,0.08)",
+            background: COLORS.accent008,
             border: `2px dashed ${COLORS.accent}`,
             borderRadius: 12,
             display: "flex",
