@@ -52,7 +52,7 @@ export default function Drawd({ initialRoomCode }) {
     updateConnection, deleteConnection,
     addConnection, convertToConditionalGroup, addToConditionalGroup, saveConnectionGroup, deleteConnectionGroup,
     addState, linkAsState, updateStateName, addDocument, updateDocument, deleteDocument,
-    replaceAll, mergeAll,
+    replaceAll, mergeAll, duplicateSelection,
     canUndo, canRedo, undo, redo, captureDragSnapshot, commitDragSnapshot,
     updateScreenStatus, markAllExisting,
   } = useScreenManager(pan, zoom, canvasRef);
@@ -358,7 +358,7 @@ export default function Drawd({ initialRoomCode }) {
     hotspotInteraction, cancelHotspotInteraction,
     selectedConnection, setSelectedConnection,
     selectedHotspots, setSelectedHotspots,
-    canvasSelection, clearSelection, removeScreens, deleteStickyNote, addScreenGroup, screens,
+    canvasSelection, setCanvasSelection, clearSelection, removeScreens, deleteStickyNote, addScreenGroup, screens,
     connections, deleteHotspot, deleteHotspots, deleteConnection, deleteConnectionGroup,
     selectedScreen, removeScreen,
     selectedStickyNote, setSelectedStickyNote,
@@ -367,6 +367,7 @@ export default function Drawd({ initialRoomCode }) {
     setActiveTool,
     onTemplates,
     isReadOnly,
+    duplicateSelection,
   });
 
   // ── Derived values ──────────────────────────────────────────────────────────────────
@@ -538,6 +539,8 @@ export default function Drawd({ initialRoomCode }) {
           setEditingConditionGroup={setEditingConditionGroup}
           groupContextMenu={groupContextMenu}
           setGroupContextMenu={setGroupContextMenu}
+          duplicateSelection={duplicateSelection}
+          setCanvasSelection={setCanvasSelection}
           handleImageUpload={handleImageUpload}
           addScreenAtCenter={addScreenAtCenter}
           isDraggingOver={isDraggingOver}

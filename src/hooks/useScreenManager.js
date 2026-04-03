@@ -11,6 +11,7 @@ import {
   GRID_MARGIN,
   PASTE_STAGGER,
   STATE_VARIANT_OFFSET,
+  DUPLICATE_OFFSET,
   HOTSPOT_PASTE_OFFSET,
   VIEWPORT_FALLBACK_WIDTH,
   VIEWPORT_FALLBACK_HEIGHT,
@@ -903,6 +904,104 @@ export function useScreenManager(pan, zoom, canvasRef) {
     setDocuments((prev) => [...prev, ...newDocuments]);
   }, [clearHistory]);
 
+  const duplicateSelection = useCallback((selectedScreenIds) => {
+    if (!selectedScreenIds || selectedScreenIds.length === 0) return [];
+
+    pushHistory(screens, connections, documents);
+
+    const selectionSet = new Set(selectedScreenIds);
+
+    // Build screen ID remap table
+    const screenIdMap = new Map();
+    selectedScreenIds.forEach((id) => screenIdMap.set(id, generateId()));
+
+    // Build hotspot ID remap table
+    const hotspotIdMap = new Map();
+    screens.forEach((s) => {
+      if (!selectionSet.has(s.id)) return;
+      s.hotspots.forEach((h) => hotspotIdMap.set(h.id, generateId()));
+    });
+
+    // Build stateGroup remap table — only remap groups where ALL members are selected
+    const stateGroupMembers = new Map(); // stateGroup -> Set of screen IDs
+    screens.forEach((s) => {
+      if (!s.stateGroup) return;
+      if (!stateGroupMembers.has(s.stateGroup)) stateGroupMembers.set(s.stateGroup, new Set());
+      stateGroupMembers.get(s.stateGroup).add(s.id);
+    });
+    const stateGroupMap = new Map();
+    stateGroupMembers.forEach((members, groupId) => {
+      const allSelected = [...members].every((id) => selectionSet.has(id));
+      if (allSelected) stateGroupMap.set(groupId, generateId());
+    });
+
+    // Build conditionGroupId remap table from connections being duplicated
+    const conditionGroupMap = new Map();
+    connections.forEach((c) => {
+      if (!c.conditionGroupId) return;
+      if (!selectionSet.has(c.fromScreenId) || !selectionSet.has(c.toScreenId)) return;
+      if (!conditionGroupMap.has(c.conditionGroupId)) {
+        conditionGroupMap.set(c.conditionGroupId, generateId());
+      }
+    });
+
+    // Helper to remap a target screen ID (only if it's in the selection)
+    const remapTarget = (id) => (id && screenIdMap.has(id) ? screenIdMap.get(id) : id);
+
+    // Clone screens
+    const clonedScreens = screens
+      .filter((s) => selectionSet.has(s.id))
+      .map((s) => {
+        const clonedHotspots = s.hotspots.map((h) => {
+          const cloned = { ...h, id: hotspotIdMap.get(h.id) ?? generateId() };
+          if (cloned.targetScreenId) cloned.targetScreenId = remapTarget(cloned.targetScreenId);
+          if (cloned.onSuccessTargetId) cloned.onSuccessTargetId = remapTarget(cloned.onSuccessTargetId);
+          if (cloned.onErrorTargetId) cloned.onErrorTargetId = remapTarget(cloned.onErrorTargetId);
+          if (Array.isArray(cloned.conditions)) {
+            cloned.conditions = cloned.conditions.map((cond) =>
+              cond.targetScreenId
+                ? { ...cond, targetScreenId: remapTarget(cond.targetScreenId) }
+                : cond
+            );
+          }
+          return cloned;
+        });
+
+        return {
+          ...s,
+          id: screenIdMap.get(s.id),
+          name: s.name ? `${s.name} (copy)` : s.name,
+          x: s.x + DUPLICATE_OFFSET,
+          stateGroup: s.stateGroup && stateGroupMap.has(s.stateGroup)
+            ? stateGroupMap.get(s.stateGroup)
+            : null,
+          stateName: s.stateGroup && stateGroupMap.has(s.stateGroup) ? s.stateName : "",
+          hotspots: clonedHotspots,
+        };
+      });
+
+    // Clone connections where both endpoints are in the selection
+    const clonedConnections = connections
+      .filter((c) => selectionSet.has(c.fromScreenId) && selectionSet.has(c.toScreenId))
+      .map((c) => ({
+        ...c,
+        id: generateId(),
+        fromScreenId: screenIdMap.get(c.fromScreenId),
+        toScreenId: screenIdMap.get(c.toScreenId),
+        hotspotId: c.hotspotId && hotspotIdMap.has(c.hotspotId)
+          ? hotspotIdMap.get(c.hotspotId)
+          : c.hotspotId,
+        conditionGroupId: c.conditionGroupId && conditionGroupMap.has(c.conditionGroupId)
+          ? conditionGroupMap.get(c.conditionGroupId)
+          : c.conditionGroupId,
+      }));
+
+    setScreens((prev) => [...prev, ...clonedScreens]);
+    setConnections((prev) => [...prev, ...clonedConnections]);
+
+    return clonedScreens.map((s) => s.id);
+  }, [screens, connections, documents, pushHistory]);
+
   return {
     screens,
     connections,
@@ -956,6 +1055,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
     deleteDocument,
     replaceAll,
     mergeAll,
+    duplicateSelection,
     canUndo,
     canRedo,
     undo,
