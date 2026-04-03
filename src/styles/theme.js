@@ -77,6 +77,7 @@ export const Z_INDEX = {
   batchBar: 900,
   modal: 1000,
   contextMenu: 9999,
+  toast: 10000,
 };
 
 export const STATUS_CONFIG = {

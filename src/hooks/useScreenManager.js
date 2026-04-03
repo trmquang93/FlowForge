@@ -19,6 +19,30 @@ import {
   HEADER_HEIGHT,
 } from "../constants";
 
+function makeScreen(overrides = {}) {
+  return {
+    id: generateId(),
+    name: "",
+    x: 0,
+    y: 0,
+    width: DEFAULT_SCREEN_WIDTH,
+    imageData: null,
+    description: "",
+    notes: "",
+    codeRef: "",
+    status: "new",
+    acceptanceCriteria: [],
+    hotspots: [],
+    stateGroup: null,
+    stateName: "",
+    tbd: false,
+    tbdNote: "",
+    roles: [],
+    figmaSource: null,
+    ...overrides,
+  };
+}
+
 export function useScreenManager(pan, zoom, canvasRef) {
   const [screens, setScreens] = useState([]);
   const [connections, setConnections] = useState([]);
@@ -109,26 +133,12 @@ export function useScreenManager(pan, zoom, canvasRef) {
     const count = screenCounter.current++;
     const offsetX = (screens.length % GRID_COLUMNS) * GRID_COL_WIDTH + GRID_MARGIN;
     const offsetY = Math.floor(screens.length / GRID_COLUMNS) * GRID_ROW_HEIGHT + GRID_MARGIN;
-    const newScreen = {
-      id: generateId(),
+    const newScreen = makeScreen({
       name: name || SCREEN_NAME_TEMPLATE(count),
       x: (-pan.x + offsetX) / zoom,
       y: (-pan.y + offsetY) / zoom,
-      width: DEFAULT_SCREEN_WIDTH,
       imageData,
-      description: "",
-      notes: "",
-      codeRef: "",
-      status: "new",
-      acceptanceCriteria: [],
-      hotspots: [],
-      stateGroup: null,
-      stateName: "",
-      tbd: false,
-      tbdNote: "",
-      roles: [],
-      figmaSource: null,
-    };
+    });
     setScreens((prev) => [...prev, newScreen]);
     setSelectedScreen(newScreen.id);
   }, [screens, connections, documents, pushHistory, pan, zoom]);
@@ -141,27 +151,13 @@ export function useScreenManager(pan, zoom, canvasRef) {
     const vh = el ? el.clientHeight : VIEWPORT_FALLBACK_HEIGHT;
     const cx = (-pan.x + vw / 2) / zoom - DEFAULT_SCREEN_WIDTH / 2 + offset * PASTE_STAGGER;
     const cy = (-pan.y + vh / 2) / zoom - CENTER_HEIGHT_ESTIMATE / 2 + offset * PASTE_STAGGER;
-    const newScreen = {
-      id: generateId(),
+    const newScreen = makeScreen({
       name: name || SCREEN_NAME_TEMPLATE(count),
       x: cx,
       y: cy,
-      width: DEFAULT_SCREEN_WIDTH,
       imageData,
-      description: "",
-      notes: "",
-      codeRef: "",
-      status: "new",
-      acceptanceCriteria: [],
-      hotspots: [],
-      stateGroup: null,
-      stateName: "",
-      tbd: false,
-      tbdNote: "",
-      roles: [],
-      figmaSource: null,
       ...meta,
-    };
+    });
     setScreens((prev) => [...prev, newScreen]);
     setSelectedScreen(newScreen.id);
   }, [screens, connections, documents, pushHistory, pan, zoom, canvasRef]);
@@ -169,25 +165,11 @@ export function useScreenManager(pan, zoom, canvasRef) {
   const addScreensBatch = useCallback((screenDefs) => {
     if (screenDefs.length === 0) return 0;
     pushHistory(screens, connections, documents);
-    const newScreens = screenDefs.map((def) => ({
-      id: generateId(),
+    const newScreens = screenDefs.map((def) => makeScreen({
       name: def.name,
       x: def.x,
       y: def.y,
-      width: DEFAULT_SCREEN_WIDTH,
       imageData: def.imageData,
-      description: "",
-      notes: "",
-      codeRef: "",
-      status: "new",
-      acceptanceCriteria: [],
-      hotspots: [],
-      stateGroup: null,
-      stateName: "",
-      tbd: false,
-      tbdNote: "",
-      roles: [],
-      figmaSource: null,
     }));
     setScreens((prev) => [...prev, ...newScreens]);
     setSelectedScreen(newScreens[0].id);
@@ -357,11 +339,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
     });
   }, [addScreenAtCenter, selectedScreen, screens, assignScreenImage]);
 
-  const handleCanvasDrop = useCallback((e, worldX, worldY) => {
-    e.preventDefault();
-    const files = Array.from(e.dataTransfer.files).filter(
-      (f) => f.type === "image/png" || f.type === "image/jpeg"
-    );
+  const handleCanvasDrop = useCallback((files, worldX, worldY) => {
     if (files.length === 0) return;
 
     Promise.all(
@@ -840,26 +818,14 @@ export function useScreenManager(pan, zoom, canvasRef) {
     }
 
     screenCounter.current++;
-    const newScreen = {
-      id: generateId(),
+    const newScreen = makeScreen({
       name: parent.name,
       x: parent.x + STATE_VARIANT_OFFSET,
       y: parent.y,
       width: parent.width || DEFAULT_SCREEN_WIDTH,
-      imageData: null,
-      description: "",
-      notes: "",
-      codeRef: "",
-      status: "new",
-      acceptanceCriteria: [],
-      hotspots: [],
       stateGroup: groupId,
       stateName: `State ${stateNumber - 1}`,
-      tbd: false,
-      tbdNote: "",
-      roles: [],
-      figmaSource: null,
-    };
+    });
     setScreens((prev) => [...prev, newScreen]);
     setSelectedScreen(newScreen.id);
   }, [screens, connections, documents, pushHistory]);
