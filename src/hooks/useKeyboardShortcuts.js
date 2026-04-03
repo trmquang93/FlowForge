@@ -57,6 +57,9 @@ export function useKeyboardShortcuts({
   onTemplates,
   // collaboration
   isReadOnly,
+  // duplication
+  duplicateSelection,
+  setCanvasSelection,
 }) {
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -200,6 +203,20 @@ export function useKeyboardShortcuts({
         return;
       }
 
+      // Duplicate selection (Cmd+D)
+      if ((e.metaKey || e.ctrlKey) && e.key === "d") {
+        const tag = document.activeElement?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if (anyModalOpen) return;
+        if (isReadOnly) return;
+        e.preventDefault();
+        const screenIds = canvasSelection.filter((i) => i.type === "screen").map((i) => i.id);
+        if (screenIds.length === 0) return;
+        const newIds = duplicateSelection(screenIds);
+        setCanvasSelection(newIds.map((id) => ({ type: "screen", id })));
+        return;
+      }
+
       // Save shortcut (Cmd+S)
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
@@ -251,6 +268,6 @@ export function useKeyboardShortcuts({
     deleteHotspot, selectedStickyNote, setSelectedStickyNote, deleteStickyNote,
     selectedScreenGroup, setSelectedScreenGroup, deleteScreenGroup,
     setActiveTool, canvasSelection, clearSelection, removeScreens, addScreenGroup, screens,
-    onTemplates, isReadOnly,
+    onTemplates, isReadOnly, duplicateSelection, setCanvasSelection,
   ]);
 }

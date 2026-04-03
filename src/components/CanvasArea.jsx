@@ -50,6 +50,7 @@ export function CanvasArea({
   editingConditionGroup, updateConnection, setEditingConditionGroup,
   // Group context menu
   groupContextMenu, setGroupContextMenu,
+  duplicateSelection, setCanvasSelection,
   // ToolBar
   setActiveTool, handleImageUpload, addScreenAtCenter,
   // Drop zone overlay
@@ -322,6 +323,36 @@ export function CanvasArea({
           }}
           onMouseLeave={() => setGroupContextMenu(null)}
         >
+          {!isReadOnly && (
+            <>
+              <button
+                onClick={() => {
+                  const selScreenIds = canvasSelection.filter((i) => i.type === "screen").map((i) => i.id);
+                  const ids = selScreenIds.length > 0 ? selScreenIds : [groupContextMenu.screenId];
+                  const newIds = duplicateSelection(ids);
+                  setCanvasSelection(newIds.map((id) => ({ type: "screen", id })));
+                  setGroupContextMenu(null);
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "6px 14px",
+                  background: "none",
+                  border: "none",
+                  color: COLORS.text,
+                  fontFamily: FONTS.mono,
+                  fontSize: 12,
+                  textAlign: "left",
+                  cursor: "pointer",
+                }}
+              >
+                {canvasSelection.filter((i) => i.type === "screen").length > 1
+                  ? "Duplicate Selection"
+                  : "Duplicate Screen"}
+              </button>
+              <div style={{ height: 1, background: COLORS.border, margin: "4px 0" }} />
+            </>
+          )}
           <div style={{
             fontSize: 9,
             color: COLORS.textDim,
