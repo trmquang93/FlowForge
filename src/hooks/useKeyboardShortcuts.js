@@ -3,6 +3,7 @@ import { useEffect } from "react";
 export function useKeyboardShortcuts({
   // modal open state (used to block undo/delete when any modal is open)
   hotspotModal,
+  onAddWireframe,
   connectionEditModal,
   renameModal,
   importConfirm,
@@ -100,6 +101,16 @@ export function useKeyboardShortcuts({
         if (anyModalOpen) return;
         if (isReadOnly) return;
         onTemplates();
+        return;
+      }
+
+      // Open wireframe designer: W
+      if ((e.key === "w" || e.key === "W") && !e.metaKey && !e.ctrlKey) {
+        const tag = document.activeElement?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if (anyModalOpen) return;
+        if (isReadOnly) return;
+        onAddWireframe?.();
         return;
       }
 
@@ -268,6 +279,6 @@ export function useKeyboardShortcuts({
     deleteHotspot, selectedStickyNote, setSelectedStickyNote, deleteStickyNote,
     selectedScreenGroup, setSelectedScreenGroup, deleteScreenGroup,
     setActiveTool, canvasSelection, clearSelection, removeScreens, addScreenGroup, screens,
-    onTemplates, isReadOnly, duplicateSelection, setCanvasSelection,
+    onTemplates, isReadOnly, duplicateSelection, setCanvasSelection, onAddWireframe,
   ]);
 }

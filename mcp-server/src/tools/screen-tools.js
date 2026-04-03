@@ -1,11 +1,11 @@
 export const screenTools = [
   {
     name: "create_screen",
-    description: "Create a new screen by rendering HTML content to a PNG image. The HTML is rendered at the specified device viewport size using headless Chrome. If no position is specified, the screen is auto-placed on a grid layout.",
+    description: "Create a new screen by rendering HTML content to an image. If no position is specified, the screen is auto-placed on a grid layout.",
     inputSchema: {
       type: "object",
       properties: {
-        html: { type: "string", description: "HTML content to render as the screen image. Include full HTML with <style> tags for styling." },
+        html: { type: "string", description: "HTML content to render as the screen image. Use inline styles only (no <style> tags or CSS classes). Use display:flex for layout. Supported: flexbox, colors, fonts, borders, border-radius, padding, margin, background, box-shadow, opacity, overflow, text styling." },
         name: { type: "string", description: "Screen name (e.g., 'Login Screen', 'Home Feed')" },
         device: {
           type: "string",
@@ -97,12 +97,12 @@ export const screenTools = [
   },
   {
     name: "update_screen_image",
-    description: "Re-render a screen's image from new HTML content.",
+    description: "Re-render a screen's image from new HTML content. Use inline styles only (no <style> tags).",
     inputSchema: {
       type: "object",
       properties: {
         screenId: { type: "string", description: "ID of the screen to update" },
-        html: { type: "string", description: "New HTML content to render" },
+        html: { type: "string", description: "New HTML content to render. Use inline styles only." },
         device: {
           type: "string",
           enum: ["iphone-15-pro", "iphone-se", "iphone-16-pro-max", "ipad", "ipad-pro-13", "android", "android-tablet"],
@@ -148,6 +148,8 @@ export async function handleScreenTool(name, args, state, renderer) {
       let imageData = null;
       let imageWidth = null;
       let imageHeight = null;
+      let svgContent = null;
+      const sourceHtml = args.html || null;
 
       if (args.html) {
         const result = await renderer.render(args.html, {
@@ -158,6 +160,7 @@ export async function handleScreenTool(name, args, state, renderer) {
         imageData = renderer.toDataUri(result.pngBuffer);
         imageWidth = result.width;
         imageHeight = result.height;
+        svgContent = result.svgString || null;
       }
 
       const screen = state.addScreen({
@@ -165,6 +168,8 @@ export async function handleScreenTool(name, args, state, renderer) {
         imageData,
         imageWidth,
         imageHeight,
+        svgContent,
+        sourceHtml,
         position: args.position,
         description: args.description,
         notes: args.notes,
@@ -253,6 +258,8 @@ export async function handleScreenTool(name, args, state, renderer) {
         imageData: renderer.toDataUri(result.pngBuffer),
         imageWidth: result.width,
         imageHeight: result.height,
+        svgContent: result.svgString || null,
+        sourceHtml: args.html,
       });
 
       return { success: true, imageWidth: result.width, imageHeight: result.height };
@@ -264,12 +271,14 @@ export async function handleScreenTool(name, args, state, renderer) {
         let imageData = null;
         let imageWidth = null;
         let imageHeight = null;
+        let svgContent = null;
 
         if (def.html) {
           const result = await renderer.render(def.html, { device: args.device });
           imageData = renderer.toDataUri(result.pngBuffer);
           imageWidth = result.width;
           imageHeight = result.height;
+          svgContent = result.svgString || null;
         }
 
         const screen = state.addScreen({
@@ -277,6 +286,8 @@ export async function handleScreenTool(name, args, state, renderer) {
           imageData,
           imageWidth,
           imageHeight,
+          svgContent,
+          sourceHtml: def.html || null,
           description: def.description,
           notes: def.notes,
           tbd: !def.html,

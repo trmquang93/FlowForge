@@ -129,6 +129,9 @@ export class FlowState {
       imageData = null,
       imageWidth,
       imageHeight,
+      svgContent = null,
+      sourceHtml = null,
+      wireframe = null,
       position,
       description = "",
       notes = "",
@@ -149,6 +152,9 @@ export class FlowState {
       imageData,
       imageWidth: imageWidth || null,
       imageHeight: imageHeight || null,
+      svgContent,
+      sourceHtml,
+      wireframe,
       description,
       notes,
       codeRef: "",
@@ -179,6 +185,7 @@ export class FlowState {
       "name", "description", "notes", "codeRef", "status",
       "tbd", "tbdNote", "roles", "acceptanceCriteria",
       "imageData", "imageWidth", "imageHeight",
+      "svgContent", "sourceHtml", "wireframe",
     ];
     for (const key of allowed) {
       if (updates[key] !== undefined) {

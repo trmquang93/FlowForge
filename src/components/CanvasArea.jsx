@@ -1,5 +1,6 @@
 import { COLORS, FONTS, Z_INDEX } from "../styles/theme";
 import { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT } from "../constants";
+import { copyScreenForFigma, downloadScreenSvg } from "../utils/copyToFigma";
 import { ScreenNode } from "./ScreenNode";
 import { ConnectionLines } from "./ConnectionLines";
 import { ConditionalPrompt } from "./ConditionalPrompt";
@@ -53,6 +54,8 @@ export function CanvasArea({
   duplicateSelection, setCanvasSelection,
   // ToolBar
   setActiveTool, handleImageUpload, addScreenAtCenter,
+  onAddWireframe, onEditWireframe,
+  showToast,
   // Drop zone overlay
   isDraggingOver, onCanvasDragEnter, onCanvasDragLeave,
   // Templates
@@ -307,7 +310,10 @@ export function CanvasArea({
       </div>
 
       {/* Screen group context menu */}
-      {groupContextMenu && (
+      {groupContextMenu && (() => {
+        const ctxScreen = screens.find((s) => s.id === groupContextMenu.screenId);
+        const hasFigmaExport = ctxScreen && (ctxScreen.svgContent || ctxScreen.wireframe);
+        return (
         <div
           style={{
             position: "absolute",
@@ -318,7 +324,7 @@ export function CanvasArea({
             borderRadius: 8,
             padding: "6px 0",
             zIndex: Z_INDEX.contextMenu,
-            minWidth: 180,
+            minWidth: 190,
             boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
           }}
           onMouseLeave={() => setGroupContextMenu(null)}
@@ -349,6 +355,74 @@ export function CanvasArea({
                 {canvasSelection.filter((i) => i.type === "screen").length > 1
                   ? "Duplicate Selection"
                   : "Duplicate Screen"}
+              </button>
+              {ctxScreen?.wireframe && (
+                <button
+                  onClick={() => {
+                    onEditWireframe?.(groupContextMenu.screenId);
+                    setGroupContextMenu(null);
+                  }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "6px 14px",
+                    background: "none",
+                    border: "none",
+                    color: COLORS.text,
+                    fontFamily: FONTS.mono,
+                    fontSize: 12,
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  Edit Wireframe
+                </button>
+              )}
+              <div style={{ height: 1, background: COLORS.border, margin: "4px 0" }} />
+            </>
+          )}
+          {hasFigmaExport && (
+            <>
+              <button
+                onClick={async () => {
+                  const ok = await copyScreenForFigma(ctxScreen);
+                  setGroupContextMenu(null);
+                  if (ok && showToast) showToast("SVG copied — paste in Figma");
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "6px 14px",
+                  background: "none",
+                  border: "none",
+                  color: COLORS.accentLight,
+                  fontFamily: FONTS.mono,
+                  fontSize: 12,
+                  textAlign: "left",
+                  cursor: "pointer",
+                }}
+              >
+                Copy for Figma
+              </button>
+              <button
+                onClick={() => {
+                  downloadScreenSvg(ctxScreen);
+                  setGroupContextMenu(null);
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "6px 14px",
+                  background: "none",
+                  border: "none",
+                  color: COLORS.textMuted,
+                  fontFamily: FONTS.mono,
+                  fontSize: 12,
+                  textAlign: "left",
+                  cursor: "pointer",
+                }}
+              >
+                Download SVG
               </button>
               <div style={{ height: 1, background: COLORS.border, margin: "4px 0" }} />
             </>
@@ -430,7 +504,8 @@ export function CanvasArea({
             Remove from group
           </button>
         </div>
-      )}
+        );
+      })()}
 
       {/* Tool switcher */}
       <ToolBar
@@ -447,6 +522,7 @@ export function CanvasArea({
           addStickyNote(worldX, worldY);
         }}
         onTemplates={onTemplates}
+        onAddWireframe={onAddWireframe}
       />
     </div>
   );

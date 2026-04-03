@@ -27,6 +27,7 @@ import { ScreensPanel } from "./components/ScreensPanel";
 import { CanvasArea } from "./components/CanvasArea";
 import { ModalsLayer } from "./components/ModalsLayer";
 import { Toast } from "./components/Toast";
+import { WireframeEditor } from "./components/wireframe/WireframeEditor";
 import { CollabPresence } from "./components/CollabPresence";
 import { CollabBadge } from "./components/CollabBadge";
 import { importFlow } from "./utils/importFlow";
@@ -54,7 +55,7 @@ export default function Drawd({ initialRoomCode }) {
     addState, linkAsState, updateStateName, addDocument, updateDocument, deleteDocument,
     replaceAll, mergeAll, duplicateSelection,
     canUndo, canRedo, undo, redo, captureDragSnapshot, commitDragSnapshot,
-    updateScreenStatus, markAllExisting,
+    updateScreenStatus, markAllExisting, updateWireframe,
   } = useScreenManager(pan, zoom, canvasRef);
 
   // ── Canvas multi-object selection ────────────────────────────────────────
@@ -288,6 +289,10 @@ export default function Drawd({ initialRoomCode }) {
     return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
   }, []);
 
+  // ── Wireframe editor state ─────────────────────────────────────────────────────────
+  // null = closed; { screenId, components, viewport } = open
+  const [wireframeEditor, setWireframeEditor] = useState(null);
+
   // ── Drag-over state (drop zone overlay) ───────────────────────────────────────────
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const dragCounterRef = useRef(0);
@@ -368,6 +373,7 @@ export default function Drawd({ initialRoomCode }) {
     onTemplates,
     isReadOnly,
     duplicateSelection,
+    onAddWireframe: () => setWireframeEditor({ screenId: null, components: [], viewport: { width: 393, height: 852 } }),
   });
 
   // ── Derived values ──────────────────────────────────────────────────────────────────
@@ -547,6 +553,12 @@ export default function Drawd({ initialRoomCode }) {
           onCanvasDragEnter={onCanvasDragEnter}
           onCanvasDragLeave={onCanvasDragLeave}
           onTemplates={onTemplates}
+          showToast={showToast}
+          onAddWireframe={() => setWireframeEditor({ screenId: null, components: [], viewport: { width: 393, height: 852 } })}
+          onEditWireframe={(screenId) => {
+            const s = screens.find((sc) => sc.id === screenId);
+            if (s?.wireframe) setWireframeEditor({ screenId, components: s.wireframe.components, viewport: s.wireframe.viewport });
+          }}
         />
 
         {selectedScreenData && (
@@ -637,6 +649,23 @@ export default function Drawd({ initialRoomCode }) {
         onInsertTemplate={onInsertTemplate}
       />
       <Toast message={toast} />
+      {wireframeEditor && (
+        <WireframeEditor
+          screenId={wireframeEditor.screenId}
+          initialComponents={wireframeEditor.components}
+          viewport={wireframeEditor.viewport}
+          screenName={wireframeEditor.screenId ? screens.find((s) => s.id === wireframeEditor.screenId)?.name : "New Wireframe"}
+          onSave={(screenId, components, viewport, imageData) => {
+            if (screenId) {
+              updateWireframe(screenId, { components, viewport }, imageData);
+            } else {
+              addScreenAtCenter(imageData, "Wireframe Screen", 0, { wireframe: { components, viewport } });
+            }
+            setWireframeEditor(null);
+          }}
+          onCancel={() => setWireframeEditor(null)}
+        />
+      )}
     </div>
   );
 }
