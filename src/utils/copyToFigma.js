@@ -182,6 +182,134 @@ export async function copyScreensForFigma(screens) {
   return items.length;
 }
 
+// ─── Figma native clipboard (editable layers) ───────────────────────────────
+
+/**
+ * Extracts the viewport dimensions from the HTML source by reading the root
+ * element's inline width/height declarations. Satori-generated screens always
+ * have explicit pixel dimensions on the outermost div.
+ *
+ * Falls back to standard iPhone 15 Pro dimensions (393×852) if not found.
+ */
+function parseHtmlViewport(html) {
+  const wMatch = html.match(/width\s*:\s*(\d+)px/);
+  const hMatch = html.match(/height\s*:\s*(\d+)px/);
+  return {
+    width: wMatch ? parseInt(wMatch[1]) : 393,
+    height: hMatch ? parseInt(hMatch[1]) : 852,
+  };
+}
+
+/**
+ * Copies a single screen to the clipboard in Figma's native binary format.
+ * When pasted in Figma, this produces editable frames with proper fills,
+ * text nodes, corner radii, and auto-layout — not flat SVG vectors.
+ *
+ * Uses fig-kiwi to generate the Kiwi-serialized clipboard HTML that Figma
+ * recognizes as native paste data. Runs entirely in the browser via a
+ * hidden iframe for DOM traversal.
+ *
+ * @returns {Promise<boolean>} true on success
+ */
+export async function copyScreenForFigmaEditable(screen) {
+  if (!screen.sourceHtml) return false;
+
+  const { htmlToRawNodeTree } = await import("./htmlToFigmaNodes");
+  const { copyAsFigmaClipboard } = await import("./figmaClipboard");
+
+  const viewport = parseHtmlViewport(screen.sourceHtml);
+  const rootNode = await htmlToRawNodeTree(screen.sourceHtml, {
+    width: viewport.width,
+    height: viewport.height,
+    name: screen.name || "Screen",
+  });
+
+  await copyAsFigmaClipboard(rootNode);
+  return true;
+}
+
+/**
+ * Copies multiple screens to the clipboard in Figma's native binary format.
+ * Each screen becomes a separate top-level frame. Screens are positioned
+ * side-by-side with a 40px gap.
+ *
+ * @returns {Promise<number|false>} number of screens copied, or false
+ */
+export async function copyScreensForFigmaEditable(screens) {
+  const withHtml = screens.filter((s) => s.sourceHtml);
+  if (withHtml.length === 0) return false;
+
+  const { htmlToRawNodeTree } = await import("./htmlToFigmaNodes");
+  const { buildFigmaClipboardHtml } = await import("./figmaClipboard");
+
+  const GAP = 40;
+
+  if (withHtml.length === 1) {
+    const viewport = parseHtmlViewport(withHtml[0].sourceHtml);
+    const rootNode = await htmlToRawNodeTree(withHtml[0].sourceHtml, {
+      width: viewport.width,
+      height: viewport.height,
+      name: withHtml[0].name || "Screen",
+    });
+    const html = buildFigmaClipboardHtml(rootNode);
+    await navigator.clipboard.write([
+      new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }) }),
+    ]);
+    return 1;
+  }
+
+  // For multiple screens, build each node tree, offset x positions, then
+  // wrap them in a single parent frame
+  const childNodes = [];
+  let maxWidth = 393;
+  let maxHeight = 852;
+  for (let i = 0; i < withHtml.length; i++) {
+    const s = withHtml[i];
+    const vp = parseHtmlViewport(s.sourceHtml);
+    if (vp.width > maxWidth) maxWidth = vp.width;
+    if (vp.height > maxHeight) maxHeight = vp.height;
+    const rootNode = await htmlToRawNodeTree(s.sourceHtml, {
+      width: vp.width,
+      height: vp.height,
+      name: s.name || "Screen",
+    });
+    rootNode.x = i * (maxWidth + GAP);
+    rootNode.y = 0;
+    childNodes.push(rootNode);
+  }
+
+  // Create a wrapper frame that contains all screens
+  const wrapper = {
+    type: "FRAME",
+    name: "Screens",
+    x: 0,
+    y: 0,
+    width: withHtml.length * maxWidth + (withHtml.length - 1) * GAP,
+    height: maxHeight,
+    opacity: 1,
+    fills: [],
+    strokes: [],
+    strokeWeight: 0,
+    strokeAlign: "INSIDE",
+    effects: [],
+    cornerRadius: 0,
+    clipsContent: false,
+    layoutMode: "NONE",
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    itemSpacing: 0,
+    children: childNodes,
+  };
+
+  const html = buildFigmaClipboardHtml(wrapper);
+  await navigator.clipboard.write([
+    new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }) }),
+  ]);
+  return withHtml.length;
+}
+
 /**
  * Downloads the screen as an SVG file.
  */

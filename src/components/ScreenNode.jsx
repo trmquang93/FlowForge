@@ -13,6 +13,7 @@ export function ScreenNode({
   isMultiSelected, onToggleSelect, onMultiDragStart,
   isReadOnly,
   onFormSummary,
+  mcpFlash,
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -149,6 +150,7 @@ export function ScreenNode({
                   ? `0 0 30px ${COLORS.accentGlow}, 0 8px 32px rgba(0,0,0,0.5)`
                   : "0 4px 20px rgba(0,0,0,0.4)",
         transition: "border-color 0.2s, box-shadow 0.2s, background 0.2s, opacity 0.2s",
+        animation: mcpFlash ? "mcp-flash 0.8s ease-out" : undefined,
         overflow: "hidden",
         userSelect: "none",
         opacity: outOfScope ? 0.3 : status === "existing" ? 0.65 : 1,

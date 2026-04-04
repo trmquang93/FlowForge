@@ -1,6 +1,6 @@
 import { COLORS, FONTS, Z_INDEX } from "../styles/theme";
 import { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT } from "../constants";
-import { copyScreenForFigma, copyScreensForFigma, downloadScreenSvg } from "../utils/copyToFigma";
+import { copyScreenForFigma, copyScreensForFigma, copyScreensForFigmaEditable, downloadScreenSvg } from "../utils/copyToFigma";
 import { ScreenNode } from "./ScreenNode";
 import { ConnectionLines } from "./ConnectionLines";
 import { ConditionalPrompt } from "./ConditionalPrompt";
@@ -60,6 +60,8 @@ export function CanvasArea({
   isDraggingOver, onCanvasDragEnter, onCanvasDragLeave,
   // Templates
   onTemplates,
+  // MCP flash
+  mcpFlashIds,
 }) {
   return (
     <div
@@ -193,6 +195,7 @@ export function CanvasArea({
             onMultiDragStart={onMultiDragStart}
             isReadOnly={isReadOnly}
             onFormSummary={onFormSummary}
+            mcpFlash={mcpFlashIds?.has(screen.id)}
           />
         ))}
         {stickyNotes.map((note) => (
@@ -231,6 +234,7 @@ export function CanvasArea({
               window.addEventListener("mousemove", onMove);
               window.addEventListener("mouseup", onUp);
             }}
+            mcpFlash={mcpFlashIds?.has(note.id)}
           />
         ))}
         <SelectionOverlay rubberBandRect={rubberBandRect} />
@@ -244,6 +248,7 @@ export function CanvasArea({
           onConnectionDoubleClick={onConnectionDoubleClick}
           onEndpointMouseDown={onEndpointMouseDown}
           endpointDragPreview={endpointDragPreview}
+          mcpFlashIds={mcpFlashIds}
         />
         {repositionGhost && (
           <div
@@ -320,6 +325,7 @@ export function CanvasArea({
         const copyTargetScreens = copyTargetIds.map((id) => screens.find((s) => s.id === id)).filter(Boolean);
         const figmaExportCount = copyTargetScreens.filter((s) => s.svgContent || s.wireframe).length;
         const hasFigmaExport = figmaExportCount > 0;
+        const hasSourceHtml = copyTargetScreens.some((s) => s.sourceHtml);
         return (
         <div
           style={{
@@ -417,6 +423,37 @@ export function CanvasArea({
                   ? `Copy ${figmaExportCount} Screen${figmaExportCount > 1 ? "s" : ""} for Figma`
                   : "Copy for Figma"}
               </button>
+              {hasSourceHtml && (
+                <button
+                  onClick={async () => {
+                    setGroupContextMenu(null);
+                    try {
+                      const count = await copyScreensForFigmaEditable(
+                        copyTargetScreens.filter((s) => s.sourceHtml),
+                      );
+                      if (count && showToast) {
+                        showToast(`${count} editable screen${count > 1 ? "s" : ""} copied — paste in Figma`);
+                      }
+                    } catch (e) {
+                      if (showToast) showToast(`API error: ${e.message}`);
+                    }
+                  }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "6px 14px",
+                    background: "none",
+                    border: "none",
+                    color: COLORS.accent,
+                    fontFamily: FONTS.mono,
+                    fontSize: 12,
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  Copy for Figma (editable)
+                </button>
+              )}
               <button
                 onClick={() => {
                   downloadScreenSvg(ctxScreen);

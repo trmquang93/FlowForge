@@ -896,8 +896,8 @@ export function useScreenManager(pan, zoom, canvasRef) {
     );
   }, [screens, connections, documents, pushHistory]);
 
-  const replaceAll = useCallback((newScreens, newConnections, newScreenCounter, newDocuments = []) => {
-    clearHistory();
+  const replaceAll = useCallback((newScreens, newConnections, newScreenCounter, newDocuments = [], { preserveHistory = false } = {}) => {
+    if (!preserveHistory) clearHistory();
     setScreens(newScreens);
     setConnections(newConnections);
     setDocuments(newDocuments);
@@ -1065,6 +1065,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
     replaceAll,
     mergeAll,
     duplicateSelection,
+    pushHistory,
     canUndo,
     canRedo,
     undo,

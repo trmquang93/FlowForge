@@ -16,6 +16,7 @@ import { useDataModels } from "./hooks/useDataModels";
 import { useFigmaPaste } from "./hooks/useFigmaPaste";
 import { useInstructionGeneration } from "./hooks/useInstructionGeneration";
 import { useFileActions } from "./hooks/useFileActions";
+import { diffPayload } from "./utils/diffPayload";
 import { useCollabSync } from "./hooks/useCollabSync";
 import { useInteractionCallbacks } from "./hooks/useInteractionCallbacks";
 import { useDerivedCanvasState } from "./hooks/useDerivedCanvasState";
@@ -54,6 +55,7 @@ export default function Drawd({ initialRoomCode }) {
     addConnection, convertToConditionalGroup, addToConditionalGroup, saveConnectionGroup, deleteConnectionGroup,
     addState, linkAsState, updateStateName, addDocument, updateDocument, deleteDocument,
     replaceAll, mergeAll, duplicateSelection,
+    pushHistory,
     canUndo, canRedo, undo, redo, captureDragSnapshot, commitDragSnapshot,
     updateScreenStatus, markAllExisting, updateWireframe,
   } = useScreenManager(pan, zoom, canvasRef);
@@ -136,7 +138,7 @@ export default function Drawd({ initialRoomCode }) {
   // Ref bridge breaks the circular dep: useFilePersistence is called first,
   // but needs applyPayload which comes from useFileActions below.
   const externalChangeRef = useRef(null);
-  const onExternalChange = useCallback((payload) => { externalChangeRef.current?.(payload); }, []);
+  const onExternalChange = useCallback((payload, opts) => { externalChangeRef.current?.(payload, opts); }, []);
 
   const {
     connectedFileName, saveStatus, isFileSystemSupported,
@@ -145,13 +147,25 @@ export default function Drawd({ initialRoomCode }) {
 
   // ── File actions ───────────────────────────────────────────────────
   const { applyPayload, onOpen, onSaveAs, onNew } = useFileActions({
-    screens, replaceAll, setPan, setZoom,
+    screens, connections, documents,
+    replaceAll, pushHistory,
+    setPan, setZoom,
     setFeatureBrief, setTaskLink, setTechStack,
     setDataModels, setStickyNotes, setScreenGroups,
     setScopeRoot, openFile, saveAs, disconnect,
   });
-  // Complete the ref bridge so the poller can call applyPayload
-  externalChangeRef.current = applyPayload;
+  // Complete the ref bridge so the poller can call applyPayload.
+  // Re-assigned every render to capture fresh closures over current state.
+  externalChangeRef.current = (payload, opts) => {
+    const changed = diffPayload({ screens, connections, stickyNotes }, payload);
+    applyPayload(payload, opts);
+    if (changed.size > 0) {
+      setMcpFlashIds(changed);
+      if (mcpFlashTimerRef.current) clearTimeout(mcpFlashTimerRef.current);
+      mcpFlashTimerRef.current = setTimeout(() => setMcpFlashIds(null), 900);
+      showToast(`MCP updated ${changed.size} item${changed.size > 1 ? 's' : ''}`);
+    }
+  };
 
   // ── Modal state ────────────────────────────────────────────────────────
   const [hotspotModal, setHotspotModal] = useState(null);
@@ -289,6 +303,10 @@ export default function Drawd({ initialRoomCode }) {
     return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
   }, []);
 
+  // ── MCP flash state ────────────────────────────────────────────────────────────────
+  const [mcpFlashIds, setMcpFlashIds] = useState(null);
+  const mcpFlashTimerRef = useRef(null);
+
   // ── Wireframe editor state ─────────────────────────────────────────────────────────
   // null = closed; { screenId, components, viewport } = open
   const [wireframeEditor, setWireframeEditor] = useState(null);
@@ -400,6 +418,18 @@ export default function Drawd({ initialRoomCode }) {
       }}
     >
       <link href={FONT_LINK} rel="stylesheet" />
+      <style>{`
+        @keyframes mcp-flash {
+          0%   { box-shadow: 0 0 0 0 rgba(97,175,239,0.0); }
+          20%  { box-shadow: 0 0 24px 4px rgba(97,175,239,0.5); }
+          100% { box-shadow: 0 0 0 0 rgba(97,175,239,0.0); }
+        }
+        @keyframes mcp-flash-svg {
+          0%   { opacity: 0; }
+          20%  { opacity: 0.6; }
+          100% { opacity: 0; }
+        }
+      `}</style>
 
       <TopBar
         screenCount={screens.length}
@@ -557,6 +587,7 @@ export default function Drawd({ initialRoomCode }) {
           onCanvasDragLeave={onCanvasDragLeave}
           onTemplates={onTemplates}
           showToast={showToast}
+          mcpFlashIds={mcpFlashIds}
           onAddWireframe={handleAddWireframe}
           onEditWireframe={(screenId) => {
             const s = screens.find((sc) => sc.id === screenId);
