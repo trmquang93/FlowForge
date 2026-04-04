@@ -43,6 +43,16 @@ const StickyNoteIcon = () => (
   </svg>
 );
 
+const WireframeIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <rect x="6" y="6" width="5" height="3" rx="1" strokeOpacity="0.5" />
+    <line x1="6" y1="12" x2="18" y2="12" strokeOpacity="0.5" />
+    <line x1="6" y1="15" x2="14" y2="15" strokeOpacity="0.5" />
+    <rect x="6" y="17" width="12" height="2" rx="1" strokeOpacity="0.5" />
+  </svg>
+);
+
 const TOOLS = [
   { id: "select", label: "Select", icon: SelectIcon, key: "V" },
   { id: "pan", label: "Pan", icon: PanIcon, key: "H" },
@@ -92,7 +102,7 @@ function ActionButton({ icon: Icon, label, shortcutKey, onClick }) {
 
 const TemplateIcon = () => <TemplateIconBase size={16} stroke="currentColor" strokeWidth={1.8} />;
 
-export function ToolBar({ activeTool, onToolChange, onUpload, onAddBlank, onAddStickyNote, isReadOnly, onTemplates }) {
+export function ToolBar({ activeTool, onToolChange, onUpload, onAddBlank, onAddStickyNote, onAddWireframe, isReadOnly, onTemplates }) {
   return (
     <div
       style={{
@@ -161,6 +171,7 @@ export function ToolBar({ activeTool, onToolChange, onUpload, onAddBlank, onAddS
           <ActionButton icon={UploadIcon} label="Upload Screens" shortcutKey="U" onClick={onUpload} />
           <ActionButton icon={BlankScreenIcon} label="Add Blank Screen" shortcutKey="B" onClick={onAddBlank} />
           <ActionButton icon={StickyNoteIcon} label="Add Sticky Note" shortcutKey="N" onClick={onAddStickyNote} />
+          <ActionButton icon={WireframeIcon} label="Draw Wireframe" shortcutKey="W" onClick={onAddWireframe} />
           <div style={dividerStyle} />
           <ActionButton icon={TemplateIcon} label="Insert Template" shortcutKey="T" onClick={onTemplates} />
         </>

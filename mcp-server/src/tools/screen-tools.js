@@ -1,11 +1,11 @@
 export const screenTools = [
   {
     name: "create_screen",
-    description: "Create a new screen by rendering HTML content to a PNG image. The HTML is rendered at the specified device viewport size using headless Chrome. If no position is specified, the screen is auto-placed on a grid layout.",
+    description: "Create a new screen by rendering HTML content to an image. If no position is specified, the screen is auto-placed on a grid layout.",
     inputSchema: {
       type: "object",
       properties: {
-        html: { type: "string", description: "HTML content to render as the screen image. Include full HTML with <style> tags for styling." },
+        html: { type: "string", description: "HTML content to render as the screen image. Rendered by Satori (not a browser), so layout rules differ from standard HTML: (1) Use inline styles only — no <style> tags or CSS classes. (2) Every element MUST have display:flex if it has more than one child — default block/inline layout does not exist. Use flex-direction:column for vertical stacking, flex-direction:row for horizontal. (3) Wrap all text in a <div> — bare text nodes inside flex containers may be ignored. (4) Supported CSS: flexbox, colors, fonts (Inter only), borders, border-radius, padding, margin, background, linear-gradient, box-shadow, opacity, overflow, text styling. NOT supported: grid, position:absolute, transform, pseudo-elements, media queries. (5) Figma-compatible text — screens are often copied to Figma as editable nodes; follow these rules to prevent text wrapping: add white-space:nowrap to every text-leaf div; in flex rows using justify-content:space-between give the left child flex:1 and the right child flex-shrink:0; add overflow:hidden to card/field container divs; add flex-shrink:0 to icon, avatar, and badge elements." },
         name: { type: "string", description: "Screen name (e.g., 'Login Screen', 'Home Feed')" },
         device: {
           type: "string",
@@ -97,12 +97,12 @@ export const screenTools = [
   },
   {
     name: "update_screen_image",
-    description: "Re-render a screen's image from new HTML content.",
+    description: "Re-render a screen's image from new HTML content. Use inline styles only (no <style> tags).",
     inputSchema: {
       type: "object",
       properties: {
         screenId: { type: "string", description: "ID of the screen to update" },
-        html: { type: "string", description: "New HTML content to render" },
+        html: { type: "string", description: "New HTML content to render. Use inline styles only. Every element with multiple children must have display:flex. See create_screen for full rendering constraints including Figma-compatibility rules (white-space:nowrap on text leaves, flex:1/flex-shrink:0 in space-between rows, overflow:hidden on containers)." },
         device: {
           type: "string",
           enum: ["iphone-15-pro", "iphone-se", "iphone-16-pro-max", "ipad", "ipad-pro-13", "android", "android-tablet"],
@@ -122,7 +122,7 @@ export const screenTools = [
           items: {
             type: "object",
             properties: {
-              html: { type: "string", description: "HTML content (omit for blank screen)" },
+              html: { type: "string", description: "HTML content (omit for blank screen). Same Satori and Figma-compatibility rules as create_screen apply: inline styles only, display:flex on multi-child elements, white-space:nowrap on text leaves, overflow:hidden on containers." },
               name: { type: "string" },
               description: { type: "string" },
               notes: { type: "string" },
@@ -148,6 +148,8 @@ export async function handleScreenTool(name, args, state, renderer) {
       let imageData = null;
       let imageWidth = null;
       let imageHeight = null;
+      let svgContent = null;
+      const sourceHtml = args.html || null;
 
       if (args.html) {
         const result = await renderer.render(args.html, {
@@ -158,6 +160,7 @@ export async function handleScreenTool(name, args, state, renderer) {
         imageData = renderer.toDataUri(result.pngBuffer);
         imageWidth = result.width;
         imageHeight = result.height;
+        svgContent = result.svgString || null;
       }
 
       const screen = state.addScreen({
@@ -165,6 +168,8 @@ export async function handleScreenTool(name, args, state, renderer) {
         imageData,
         imageWidth,
         imageHeight,
+        svgContent,
+        sourceHtml,
         position: args.position,
         description: args.description,
         notes: args.notes,
@@ -253,6 +258,8 @@ export async function handleScreenTool(name, args, state, renderer) {
         imageData: renderer.toDataUri(result.pngBuffer),
         imageWidth: result.width,
         imageHeight: result.height,
+        svgContent: result.svgString || null,
+        sourceHtml: args.html,
       });
 
       return { success: true, imageWidth: result.width, imageHeight: result.height };
@@ -264,12 +271,14 @@ export async function handleScreenTool(name, args, state, renderer) {
         let imageData = null;
         let imageWidth = null;
         let imageHeight = null;
+        let svgContent = null;
 
         if (def.html) {
           const result = await renderer.render(def.html, { device: args.device });
           imageData = renderer.toDataUri(result.pngBuffer);
           imageWidth = result.width;
           imageHeight = result.height;
+          svgContent = result.svgString || null;
         }
 
         const screen = state.addScreen({
@@ -277,6 +286,8 @@ export async function handleScreenTool(name, args, state, renderer) {
           imageData,
           imageWidth,
           imageHeight,
+          svgContent,
+          sourceHtml: def.html || null,
           description: def.description,
           notes: def.notes,
           tbd: !def.html,

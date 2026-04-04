@@ -649,7 +649,7 @@ The MCP server exposes 27 tools organized by category:
 
 ### Creating screens from HTML
 
-The `create_screen` tool accepts an HTML string and renders it as a PNG screenshot using headless Chrome. You can specify a device preset to control the viewport size:
+The `create_screen` tool accepts an HTML string and renders it as a PNG using Satori (Vercel's SVG engine). You can specify a device preset to control the viewport size:
 
 - `iphone-15-pro` (default) — 393 x 852
 - `iphone-se` — 375 x 667
@@ -657,7 +657,12 @@ The `create_screen` tool accepts an HTML string and renders it as a PNG screensh
 - `ipad` — 820 x 1180
 - `android` — 412 x 915
 
-The AI agent writes the full screen UI as HTML/CSS, and the MCP server screenshots it into a Drawd screen at 2x resolution.
+The HTML must use **inline styles only** (no `<style>` tags or CSS classes). Use `display:flex` for layout. Supported properties include: flexbox layout, colors, fonts, borders, border-radius, padding, margin, background, opacity, overflow, and text styling.
+
+> [!NOTE]
+> Satori does not support CSS grid, animations, pseudo-elements, media queries, or class selectors. Write all styles as inline `style` attributes.
+
+Because rendering uses Satori instead of a browser, the MCP server requires no Chrome binary and renders each screen in milliseconds. Each rendered screen also stores the original SVG output for Figma export.
 
 ### Auto-connections from hotspots
 
@@ -688,3 +693,92 @@ This lets the agent modify an existing flow without needing to call `open_flow` 
 
 > [!TIP]
 > The MCP server works entirely with local `.drawd` files. There is no cloud connection required. Generated files are fully compatible with Drawd — open them via File > Open in any Chromium browser.
+
+---
+
+## Wireframe Designer
+
+The built-in wireframe designer lets you sketch screens directly in Drawd without needing external design tools or image uploads.
+
+### Opening the editor
+
+Click the **Draw Wireframe** button in the toolbar (or press `W`) to create a new wireframe screen. To edit an existing wireframe, right-click its screen on the canvas and choose **Edit Wireframe**.
+
+### Component palette
+
+The left panel contains all available component types. Drag a component onto the canvas, or click it to place it at the center of the viewport:
+
+| Component | Description |
+|-----------|-------------|
+| `rect` | Generic rectangle — shape, card, or container |
+| `text` | Text label |
+| `button` | Filled button with label |
+| `input` | Text input field with placeholder |
+| `icon` | Small icon placeholder square |
+| `image-placeholder` | Image placeholder with crosshatch pattern |
+| `list-item` | Full-width list row |
+| `nav-bar` | Navigation bar (top) |
+| `tab-bar` | Tab bar (bottom) |
+| `divider` | Horizontal separator line |
+
+### Editing components
+
+Select a component by clicking it. Use the property panel on the right to edit:
+
+- **Text** — label or placeholder content
+- **Fill** — grayscale color swatch (White, Light, Medium, Dark, Black, None)
+- **Font Size** — 8–48px
+- **Border Radius** — 0–100px
+- **Font Weight** — Normal or Bold
+- **Interactive (Hotspot)** — when checked, clicking "Done" auto-generates a hotspot over this component
+
+### Moving and resizing
+
+- **Drag** a component to move it. Positions snap to an 8px grid.
+- **Drag the resize handle** (bottom-right corner) to resize. Sizes also snap to 8px.
+
+### Keyboard shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd+Z` | Undo |
+| `Cmd+Shift+Z` | Redo |
+| `Cmd+D` | Duplicate selected component |
+| `Backspace` / `Delete` | Delete selected component |
+| `Escape` | Cancel (discard changes) |
+
+### Saving the wireframe
+
+Click **Done** to render the wireframe to a PNG and save it as the screen's image. Components marked **Interactive** will have hotspots automatically created with percentage-based coordinates.
+
+> [!TIP]
+> Re-open the editor at any time to adjust the wireframe. Changes are non-destructive — the component data is preserved separately from the rendered PNG.
+
+---
+
+## Copy to Figma
+
+Screens created via the MCP server (using Satori) or the wireframe designer can be exported as SVG and pasted directly into Figma as editable vector layers.
+
+### Copying a screen
+
+Right-click any screen on the canvas to access the export options:
+
+- **Copy for Figma** — copies the SVG to your clipboard. Switch to Figma and paste (`Cmd+V`) — the elements appear as editable vector shapes and text.
+- **Download SVG** — saves the SVG as a `.svg` file, named after the screen.
+
+These options appear when a screen has SVG data available (MCP-rendered screens and wireframe screens both qualify).
+
+### What imports as editable in Figma
+
+| Element | Figma representation |
+|---------|---------------------|
+| Rectangles | Vector frame / shape |
+| Text | Editable text layer (Inter font) |
+| Buttons | Rectangle + text group |
+| Input fields | Rectangle + placeholder text |
+| Nav bars / Tab bars | Rectangle + text labels |
+| Lines / Dividers | Vector line |
+
+> [!NOTE]
+> The SVG uses the Inter font. If your Figma document uses a different font, Figma will prompt you to replace or install Inter after pasting.

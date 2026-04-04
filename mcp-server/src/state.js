@@ -76,6 +76,15 @@ export class FlowState {
     this.filePath = target;
   }
 
+  _autoSave() {
+    if (!this.filePath) {
+      throw new Error(
+        "No flow file is open. Call create_flow or open_flow first."
+      );
+    }
+    this.save();
+  }
+
   createNew(filePath, options = {}) {
     this.screens = [];
     this.connections = [];
@@ -129,6 +138,9 @@ export class FlowState {
       imageData = null,
       imageWidth,
       imageHeight,
+      svgContent = null,
+      sourceHtml = null,
+      wireframe = null,
       position,
       description = "",
       notes = "",
@@ -149,6 +161,9 @@ export class FlowState {
       imageData,
       imageWidth: imageWidth || null,
       imageHeight: imageHeight || null,
+      svgContent,
+      sourceHtml,
+      wireframe,
       description,
       notes,
       codeRef: "",
@@ -164,6 +179,7 @@ export class FlowState {
     };
 
     this.screens.push(screen);
+    this._autoSave();
     return screen;
   }
 
@@ -179,12 +195,14 @@ export class FlowState {
       "name", "description", "notes", "codeRef", "status",
       "tbd", "tbdNote", "roles", "acceptanceCriteria",
       "imageData", "imageWidth", "imageHeight",
+      "svgContent", "sourceHtml", "wireframe",
     ];
     for (const key of allowed) {
       if (updates[key] !== undefined) {
         screen[key] = updates[key];
       }
     }
+    this._autoSave();
     return screen;
   }
 
@@ -205,6 +223,7 @@ export class FlowState {
       group.screenIds = group.screenIds.filter((id) => id !== screenId);
     }
 
+    this._autoSave();
     return { removedConnectionCount: removed.length };
   }
 
@@ -273,6 +292,7 @@ export class FlowState {
       });
     }
 
+    this._autoSave();
     return hs;
   }
 
@@ -312,6 +332,7 @@ export class FlowState {
         hs[key] = updates[key];
       }
     }
+    this._autoSave();
     return hs;
   }
 
@@ -326,6 +347,7 @@ export class FlowState {
 
     // Remove associated connections
     this.connections = this.connections.filter((c) => c.hotspotId !== hotspotId);
+    this._autoSave();
   }
 
   // ── Connection Operations ───────────────────
@@ -360,6 +382,7 @@ export class FlowState {
     };
 
     this.connections.push(conn);
+    this._autoSave();
     return conn;
   }
 
@@ -377,6 +400,7 @@ export class FlowState {
         conn[key] = updates[key];
       }
     }
+    this._autoSave();
     return conn;
   }
 
@@ -384,6 +408,7 @@ export class FlowState {
     const idx = this.connections.findIndex((c) => c.id === connectionId);
     if (idx === -1) throw new Error(`Connection not found: ${connectionId}`);
     this.connections.splice(idx, 1);
+    this._autoSave();
   }
 
   // ── Document Operations ─────────────────────
@@ -396,6 +421,7 @@ export class FlowState {
       createdAt: new Date().toISOString(),
     };
     this.documents.push(doc);
+    this._autoSave();
     return doc;
   }
 
@@ -404,6 +430,7 @@ export class FlowState {
     if (!doc) throw new Error(`Document not found: ${documentId}`);
     if (updates.name !== undefined) doc.name = updates.name;
     if (updates.content !== undefined) doc.content = updates.content;
+    this._autoSave();
     return doc;
   }
 
@@ -411,6 +438,7 @@ export class FlowState {
     const idx = this.documents.findIndex((d) => d.id === documentId);
     if (idx === -1) throw new Error(`Document not found: ${documentId}`);
     this.documents.splice(idx, 1);
+    this._autoSave();
   }
 
   // ── Data Model Operations ───────────────────
@@ -422,6 +450,7 @@ export class FlowState {
       fields: options.fields || {},
     };
     this.dataModels.push(model);
+    this._autoSave();
     return model;
   }
 
@@ -430,6 +459,7 @@ export class FlowState {
     if (!model) throw new Error(`Data model not found: ${modelId}`);
     if (updates.name !== undefined) model.name = updates.name;
     if (updates.fields !== undefined) model.fields = updates.fields;
+    this._autoSave();
     return model;
   }
 
@@ -437,6 +467,7 @@ export class FlowState {
     const idx = this.dataModels.findIndex((m) => m.id === modelId);
     if (idx === -1) throw new Error(`Data model not found: ${modelId}`);
     this.dataModels.splice(idx, 1);
+    this._autoSave();
   }
 
   // ── Sticky Note Operations ──────────────────
@@ -453,6 +484,7 @@ export class FlowState {
       author: options.author || "",
     };
     this.stickyNotes.push(note);
+    this._autoSave();
     return note;
   }
 
@@ -463,6 +495,7 @@ export class FlowState {
     for (const key of allowed) {
       if (updates[key] !== undefined) note[key] = updates[key];
     }
+    this._autoSave();
     return note;
   }
 
@@ -470,6 +503,7 @@ export class FlowState {
     const idx = this.stickyNotes.findIndex((n) => n.id === noteId);
     if (idx === -1) throw new Error(`Sticky note not found: ${noteId}`);
     this.stickyNotes.splice(idx, 1);
+    this._autoSave();
   }
 
   // ── Screen Group Operations ─────────────────
@@ -482,6 +516,7 @@ export class FlowState {
       color: options.color || "#61afef",
     };
     this.screenGroups.push(group);
+    this._autoSave();
     return group;
   }
 
@@ -491,6 +526,7 @@ export class FlowState {
     if (updates.name !== undefined) group.name = updates.name;
     if (updates.screenIds !== undefined) group.screenIds = updates.screenIds;
     if (updates.color !== undefined) group.color = updates.color;
+    this._autoSave();
     return group;
   }
 
@@ -498,6 +534,7 @@ export class FlowState {
     const idx = this.screenGroups.findIndex((g) => g.id === groupId);
     if (idx === -1) throw new Error(`Screen group not found: ${groupId}`);
     this.screenGroups.splice(idx, 1);
+    this._autoSave();
   }
 
   // ── Metadata Operations ─────────────────────
@@ -507,5 +544,6 @@ export class FlowState {
     if (updates.featureBrief !== undefined) this.metadata.featureBrief = updates.featureBrief;
     if (updates.taskLink !== undefined) this.metadata.taskLink = updates.taskLink;
     if (updates.techStack !== undefined) this.metadata.techStack = updates.techStack;
+    this._autoSave();
   }
 }

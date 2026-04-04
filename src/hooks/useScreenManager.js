@@ -40,6 +40,9 @@ function makeScreen(overrides = {}) {
     tbdNote: "",
     roles: [],
     figmaSource: null,
+    svgContent: null,
+    sourceHtml: null,
+    wireframe: null,
     ...overrides,
   };
 }
@@ -250,6 +253,11 @@ export function useScreenManager(pan, zoom, canvasRef) {
   const assignScreenImage = useCallback((id, imageData) => {
     pushHistory(screens, connections, documents);
     setScreens((prev) => prev.map((s) => (s.id === id ? { ...s, imageData, imageWidth: undefined, imageHeight: undefined } : s)));
+  }, [screens, connections, documents, pushHistory]);
+
+  const updateWireframe = useCallback((id, wireframe, imageData) => {
+    pushHistory(screens, connections, documents);
+    setScreens((prev) => prev.map((s) => (s.id === id ? { ...s, wireframe, imageData, imageWidth: undefined, imageHeight: undefined } : s)));
   }, [screens, connections, documents, pushHistory]);
 
   const moveScreen = useCallback((id, x, y) => {
@@ -888,8 +896,8 @@ export function useScreenManager(pan, zoom, canvasRef) {
     );
   }, [screens, connections, documents, pushHistory]);
 
-  const replaceAll = useCallback((newScreens, newConnections, newScreenCounter, newDocuments = []) => {
-    clearHistory();
+  const replaceAll = useCallback((newScreens, newConnections, newScreenCounter, newDocuments = [], { preserveHistory = false } = {}) => {
+    if (!preserveHistory) clearHistory();
     setScreens(newScreens);
     setConnections(newConnections);
     setDocuments(newDocuments);
@@ -1039,6 +1047,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
     markAllExisting,
     assignScreenImage,
     patchScreenImage,
+    updateWireframe,
     quickConnectHotspot,
     updateConnection,
     deleteConnection,
@@ -1056,6 +1065,7 @@ export function useScreenManager(pan, zoom, canvasRef) {
     replaceAll,
     mergeAll,
     duplicateSelection,
+    pushHistory,
     canUndo,
     canRedo,
     undo,

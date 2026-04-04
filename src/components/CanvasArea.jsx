@@ -1,5 +1,6 @@
 import { COLORS, FONTS, Z_INDEX } from "../styles/theme";
 import { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT } from "../constants";
+import { copyScreenForFigma, copyScreensForFigma, copyScreensForFigmaEditable, downloadScreenSvg } from "../utils/copyToFigma";
 import { ScreenNode } from "./ScreenNode";
 import { ConnectionLines } from "./ConnectionLines";
 import { ConditionalPrompt } from "./ConditionalPrompt";
@@ -53,10 +54,14 @@ export function CanvasArea({
   duplicateSelection, setCanvasSelection,
   // ToolBar
   setActiveTool, handleImageUpload, addScreenAtCenter,
+  onAddWireframe, onEditWireframe,
+  showToast,
   // Drop zone overlay
   isDraggingOver, onCanvasDragEnter, onCanvasDragLeave,
   // Templates
   onTemplates,
+  // MCP flash
+  mcpFlashIds,
 }) {
   return (
     <div
@@ -190,6 +195,7 @@ export function CanvasArea({
             onMultiDragStart={onMultiDragStart}
             isReadOnly={isReadOnly}
             onFormSummary={onFormSummary}
+            mcpFlash={mcpFlashIds?.has(screen.id)}
           />
         ))}
         {stickyNotes.map((note) => (
@@ -228,6 +234,7 @@ export function CanvasArea({
               window.addEventListener("mousemove", onMove);
               window.addEventListener("mouseup", onUp);
             }}
+            mcpFlash={mcpFlashIds?.has(note.id)}
           />
         ))}
         <SelectionOverlay rubberBandRect={rubberBandRect} />
@@ -241,6 +248,7 @@ export function CanvasArea({
           onConnectionDoubleClick={onConnectionDoubleClick}
           onEndpointMouseDown={onEndpointMouseDown}
           endpointDragPreview={endpointDragPreview}
+          mcpFlashIds={mcpFlashIds}
         />
         {repositionGhost && (
           <div
@@ -307,7 +315,18 @@ export function CanvasArea({
       </div>
 
       {/* Screen group context menu */}
-      {groupContextMenu && (
+      {groupContextMenu && (() => {
+        const ctxScreen = screens.find((s) => s.id === groupContextMenu.screenId);
+        const selectedScreenIds = canvasSelection.filter((i) => i.type === "screen").map((i) => i.id);
+        const isInSelection = selectedScreenIds.includes(groupContextMenu.screenId);
+        const copyTargetIds = isInSelection && selectedScreenIds.length > 1
+          ? selectedScreenIds
+          : [groupContextMenu.screenId];
+        const copyTargetScreens = copyTargetIds.map((id) => screens.find((s) => s.id === id)).filter(Boolean);
+        const figmaExportCount = copyTargetScreens.filter((s) => s.svgContent || s.wireframe).length;
+        const hasFigmaExport = figmaExportCount > 0;
+        const hasSourceHtml = copyTargetScreens.some((s) => s.sourceHtml);
+        return (
         <div
           style={{
             position: "absolute",
@@ -318,7 +337,7 @@ export function CanvasArea({
             borderRadius: 8,
             padding: "6px 0",
             zIndex: Z_INDEX.contextMenu,
-            minWidth: 180,
+            minWidth: 190,
             boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
           }}
           onMouseLeave={() => setGroupContextMenu(null)}
@@ -349,6 +368,111 @@ export function CanvasArea({
                 {canvasSelection.filter((i) => i.type === "screen").length > 1
                   ? "Duplicate Selection"
                   : "Duplicate Screen"}
+              </button>
+              {ctxScreen?.wireframe && (
+                <button
+                  onClick={() => {
+                    onEditWireframe?.(groupContextMenu.screenId);
+                    setGroupContextMenu(null);
+                  }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "6px 14px",
+                    background: "none",
+                    border: "none",
+                    color: COLORS.text,
+                    fontFamily: FONTS.mono,
+                    fontSize: 12,
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  Edit Wireframe
+                </button>
+              )}
+              <div style={{ height: 1, background: COLORS.border, margin: "4px 0" }} />
+            </>
+          )}
+          {hasFigmaExport && (
+            <>
+              <button
+                onClick={async () => {
+                  const count = await copyScreensForFigma(copyTargetScreens);
+                  setGroupContextMenu(null);
+                  if (count && showToast) {
+                    showToast(count > 1
+                      ? `${count} screens copied — paste in Figma`
+                      : "SVG copied — paste in Figma");
+                  }
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "6px 14px",
+                  background: "none",
+                  border: "none",
+                  color: COLORS.accentLight,
+                  fontFamily: FONTS.mono,
+                  fontSize: 12,
+                  textAlign: "left",
+                  cursor: "pointer",
+                }}
+              >
+                {copyTargetIds.length > 1
+                  ? `Copy ${figmaExportCount} Screen${figmaExportCount > 1 ? "s" : ""} for Figma`
+                  : "Copy for Figma"}
+              </button>
+              {hasSourceHtml && (
+                <button
+                  onClick={async () => {
+                    setGroupContextMenu(null);
+                    try {
+                      const count = await copyScreensForFigmaEditable(
+                        copyTargetScreens.filter((s) => s.sourceHtml),
+                      );
+                      if (count && showToast) {
+                        showToast(`${count} editable screen${count > 1 ? "s" : ""} copied — paste in Figma`);
+                      }
+                    } catch (e) {
+                      if (showToast) showToast(`API error: ${e.message}`);
+                    }
+                  }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "6px 14px",
+                    background: "none",
+                    border: "none",
+                    color: COLORS.accent,
+                    fontFamily: FONTS.mono,
+                    fontSize: 12,
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  Copy for Figma (editable)
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  downloadScreenSvg(ctxScreen);
+                  setGroupContextMenu(null);
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "6px 14px",
+                  background: "none",
+                  border: "none",
+                  color: COLORS.textMuted,
+                  fontFamily: FONTS.mono,
+                  fontSize: 12,
+                  textAlign: "left",
+                  cursor: "pointer",
+                }}
+              >
+                Download SVG
               </button>
               <div style={{ height: 1, background: COLORS.border, margin: "4px 0" }} />
             </>
@@ -430,7 +554,8 @@ export function CanvasArea({
             Remove from group
           </button>
         </div>
-      )}
+        );
+      })()}
 
       {/* Tool switcher */}
       <ToolBar
@@ -447,6 +572,7 @@ export function CanvasArea({
           addStickyNote(worldX, worldY);
         }}
         onTemplates={onTemplates}
+        onAddWireframe={onAddWireframe}
       />
     </div>
   );

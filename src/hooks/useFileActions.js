@@ -1,13 +1,19 @@
 import { useCallback } from "react";
 
 export function useFileActions({
-  screens, replaceAll, setPan, setZoom,
+  screens, connections, documents,
+  replaceAll, pushHistory,
+  setPan, setZoom,
   setFeatureBrief, setTaskLink, setTechStack,
   setDataModels, setStickyNotes, setScreenGroups,
   setScopeRoot, openFile, saveAs, disconnect,
 }) {
-  const applyPayload = useCallback((payload) => {
-    replaceAll(payload.screens, payload.connections, payload.screens.length + 1, payload.documents || []);
+  const applyPayload = useCallback((payload, { source } = {}) => {
+    if (source === 'mcp') {
+      pushHistory(screens, connections, documents);
+    }
+    const opts = source === 'mcp' ? { preserveHistory: true } : {};
+    replaceAll(payload.screens, payload.connections, payload.screens.length + 1, payload.documents || [], opts);
     if (payload.viewport) { setPan(payload.viewport.pan); setZoom(payload.viewport.zoom); }
     setFeatureBrief(payload.metadata?.featureBrief || "");
     setTaskLink(payload.metadata?.taskLink || "");
@@ -16,7 +22,7 @@ export function useFileActions({
     setStickyNotes(payload.stickyNotes || []);
     setScreenGroups(payload.screenGroups || []);
     setScopeRoot(null);
-  }, [replaceAll, setPan, setZoom, setFeatureBrief, setTaskLink, setTechStack, setDataModels, setStickyNotes, setScreenGroups, setScopeRoot]);
+  }, [replaceAll, pushHistory, screens, connections, documents, setPan, setZoom, setFeatureBrief, setTaskLink, setTechStack, setDataModels, setStickyNotes, setScreenGroups, setScopeRoot]);
 
   const onOpen = useCallback(async () => {
     try {

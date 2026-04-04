@@ -106,7 +106,7 @@ export function useFilePersistence(screens, connections, pan, zoom, documents = 
           const payload = importFlow(text);
           lastKnownModifiedRef.current = file.lastModified;
           skipNextSaveRef.current = true;
-          onExternalChangeRef.current?.(payload);
+          onExternalChangeRef.current?.(payload, { source: 'mcp' });
         }
       } catch (err) {
         console.warn("File poll failed:", err);

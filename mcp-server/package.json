@@ -8,17 +8,22 @@
   },
   "main": "dist/index.js",
   "files": [
-    "dist/"
+    "dist/",
+    "assets/"
   ],
   "scripts": {
     "build": "node build.js",
     "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
-    "dev": "node --import ./loader.js index.js"
+    "dev": "node --import ./loader.js index.js",
+    "api": "node --import ./loader.js api.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "puppeteer-core": "^24.9.0"
+    "@resvg/resvg-js": "^2.6.2",
+    "puppeteer-core": "^24.9.0",
+    "satori": "^0.26.0",
+    "satori-html": "^0.3.2"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

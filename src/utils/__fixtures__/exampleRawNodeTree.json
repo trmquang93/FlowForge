@@ -1,0 +1,590 @@
+{
+  "type": "FRAME",
+  "name": "Sign Up",
+  "x": 0,
+  "y": 0,
+  "width": 393,
+  "height": 234,
+  "opacity": 1,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      "opacity": 0
+    }
+  ],
+  "strokes": [],
+  "strokeWeight": 0,
+  "strokeAlign": "INSIDE",
+  "effects": [],
+  "cornerRadius": 0,
+  "clipsContent": true,
+  "layoutMode": "NONE",
+  "stackChildAlignSelf": "AUTO",
+  "children": [
+    {
+      "type": "FRAME",
+      "name": "div",
+      "x": 0,
+      "y": 0,
+      "width": 393,
+      "height": 852,
+      "opacity": 1,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.05882352963089943,
+            "g": 0.05882352963089943,
+            "b": 0.0784313753247261
+          },
+          "opacity": 1
+        }
+      ],
+      "strokes": [],
+      "strokeWeight": 0,
+      "strokeAlign": "INSIDE",
+      "effects": [],
+      "cornerRadius": 0,
+      "clipsContent": true,
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 0,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "primaryAxisAlignItems": "MIN",
+      "counterAxisAlignItems": "MIN",
+      "stackChildAlignSelf": "AUTO",
+      "children": [
+        {
+          "type": "FRAME",
+          "name": "div",
+          "x": 0,
+          "y": 0,
+          "width": 393,
+          "height": 112,
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0
+              },
+              "opacity": 0
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 0,
+          "strokeAlign": "INSIDE",
+          "effects": [],
+          "cornerRadius": 0,
+          "clipsContent": false,
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 12,
+          "paddingLeft": 24,
+          "paddingRight": 24,
+          "paddingTop": 60,
+          "paddingBottom": 16,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "CENTER",
+          "stackChildAlignSelf": "STRETCH",
+          "children": [
+            {
+              "type": "FRAME",
+              "name": "div",
+              "x": 24,
+              "y": 60,
+              "width": 36,
+              "height": 36,
+              "opacity": 1,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  },
+                  "opacity": 0.07999999821186066
+                }
+              ],
+              "strokes": [],
+              "strokeWeight": 0,
+              "strokeAlign": "INSIDE",
+              "effects": [],
+              "cornerRadius": 50,
+              "clipsContent": false,
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 0,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "stackChildAlignSelf": "STRETCH",
+              "children": [
+                {
+                  "type": "FRAME",
+                  "name": "div",
+                  "x": 12,
+                  "y": 12,
+                  "width": 12,
+                  "height": 12,
+                  "opacity": 1,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0,
+                        "g": 0,
+                        "b": 0
+                      },
+                      "opacity": 0
+                    }
+                  ],
+                  "strokes": [],
+                  "strokeWeight": 0,
+                  "strokeAlign": "INSIDE",
+                  "effects": [],
+                  "cornerRadius": 0,
+                  "clipsContent": false,
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "primaryAxisAlignItems": "MIN",
+                  "counterAxisAlignItems": "MIN",
+                  "stackChildAlignSelf": "STRETCH",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "TEXT",
+              "name": "Create Account",
+              "x": 72,
+              "y": 66.5,
+              "width": 148,
+              "height": 23,
+              "opacity": 1,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  },
+                  "opacity": 1
+                }
+              ],
+              "strokes": [],
+              "strokeWeight": 0,
+              "strokeAlign": "INSIDE",
+              "effects": [],
+              "cornerRadius": 0,
+              "stackChildAlignSelf": "STRETCH",
+              "characters": "Create Account",
+              "style": {
+                "fontFamily": "Inter",
+                "fontPostScriptName": null,
+                "fontSize": 20,
+                "fontWeight": 700,
+                "italic": false,
+                "lineHeightPx": 24,
+                "lineHeightUnit": "PIXELS",
+                "letterSpacing": 0,
+                "textAlignHorizontal": "LEFT",
+                "textAlignVertical": "TOP",
+                "textDecoration": "NONE",
+                "fills": [
+                  {
+                    "type": "SOLID",
+                    "color": {
+                      "r": 1,
+                      "g": 1,
+                      "b": 1
+                    },
+                    "opacity": 1
+                  }
+                ]
+              },
+              "singleLine": true
+            }
+          ]
+        },
+        {
+          "type": "FRAME",
+          "name": "div",
+          "x": 0,
+          "y": 112,
+          "width": 393,
+          "height": 740,
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0
+              },
+              "opacity": 0
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 0,
+          "strokeAlign": "INSIDE",
+          "effects": [],
+          "cornerRadius": 0,
+          "clipsContent": false,
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 16,
+          "paddingLeft": 24,
+          "paddingRight": 24,
+          "paddingTop": 8,
+          "paddingBottom": 0,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "MIN",
+          "primaryGrow": 1,
+          "stackChildAlignSelf": "STRETCH",
+          "children": [
+            {
+              "type": "FRAME",
+              "name": "div",
+              "x": 24,
+              "y": 8,
+              "width": 345,
+              "height": 71.5,
+              "opacity": 1,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0
+                  },
+                  "opacity": 0
+                }
+              ],
+              "strokes": [],
+              "strokeWeight": 0,
+              "strokeAlign": "INSIDE",
+              "effects": [],
+              "cornerRadius": 0,
+              "clipsContent": false,
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 8,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "primaryAxisAlignItems": "MIN",
+              "counterAxisAlignItems": "MIN",
+              "stackChildAlignSelf": "STRETCH",
+              "children": [
+                {
+                  "type": "TEXT",
+                  "name": "FULL NAME",
+                  "x": 0,
+                  "y": 0,
+                  "width": 345,
+                  "height": 15,
+                  "opacity": 1,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      },
+                      "opacity": 0.5
+                    }
+                  ],
+                  "strokes": [],
+                  "strokeWeight": 0,
+                  "strokeAlign": "INSIDE",
+                  "effects": [],
+                  "cornerRadius": 0,
+                  "stackChildAlignSelf": "STRETCH",
+                  "characters": "FULL NAME",
+                  "style": {
+                    "fontFamily": "Inter",
+                    "fontPostScriptName": null,
+                    "fontSize": 13,
+                    "fontWeight": 400,
+                    "italic": false,
+                    "lineHeightPx": 15.600000381469727,
+                    "lineHeightUnit": "PIXELS",
+                    "letterSpacing": 0,
+                    "textAlignHorizontal": "LEFT",
+                    "textAlignVertical": "TOP",
+                    "textDecoration": "NONE",
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 0.5
+                      }
+                    ]
+                  },
+                  "singleLine": true
+                },
+                {
+                  "type": "FRAME",
+                  "name": "div",
+                  "x": 0,
+                  "y": 23,
+                  "width": 345,
+                  "height": 48.5,
+                  "opacity": 1,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      },
+                      "opacity": 0.05999999865889549
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      },
+                      "opacity": 0.10000000149011612
+                    }
+                  ],
+                  "strokeWeight": 1,
+                  "strokeAlign": "INSIDE",
+                  "effects": [],
+                  "cornerRadius": 12,
+                  "clipsContent": false,
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 16,
+                  "paddingRight": 16,
+                  "paddingTop": 14,
+                  "paddingBottom": 14,
+                  "primaryAxisAlignItems": "MIN",
+                  "counterAxisAlignItems": "MIN",
+                  "stackChildAlignSelf": "STRETCH",
+                  "children": [
+                    {
+                      "type": "TEXT",
+                      "name": "Alex Johnson",
+                      "x": 17,
+                      "y": 15,
+                      "width": 97,
+                      "height": 18.5,
+                      "opacity": 1,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          },
+                          "opacity": 0.4000000059604645
+                        }
+                      ],
+                      "strokes": [],
+                      "strokeWeight": 0,
+                      "strokeAlign": "INSIDE",
+                      "effects": [],
+                      "cornerRadius": 0,
+                      "stackChildAlignSelf": "STRETCH",
+                      "characters": "Alex Johnson",
+                      "style": {
+                        "fontFamily": "Inter",
+                        "fontPostScriptName": null,
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "italic": false,
+                        "lineHeightPx": 19.200000762939453,
+                        "lineHeightUnit": "PIXELS",
+                        "letterSpacing": 0,
+                        "textAlignHorizontal": "LEFT",
+                        "textAlignVertical": "TOP",
+                        "textDecoration": "NONE",
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 1,
+                              "g": 1,
+                              "b": 1
+                            },
+                            "opacity": 0.4000000059604645
+                          }
+                        ]
+                      },
+                      "singleLine": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "FRAME",
+              "name": "div",
+              "x": 24,
+              "y": 95.5,
+              "width": 345,
+              "height": 71.5,
+              "opacity": 1,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0
+                  },
+                  "opacity": 0
+                }
+              ],
+              "strokes": [],
+              "strokeWeight": 0,
+              "strokeAlign": "INSIDE",
+              "effects": [],
+              "cornerRadius": 0,
+              "clipsContent": false,
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 8,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "primaryAxisAlignItems": "MIN",
+              "counterAxisAlignItems": "MIN",
+              "stackChildAlignSelf": "STRETCH",
+              "children": [
+                {
+                  "type": "TEXT",
+                  "name": "EMAIL",
+                  "x": 0,
+                  "y": 0,
+                  "width": 345,
+                  "height": 15,
+                  "opacity": 1,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      },
+                      "opacity": 0.5
+                    }
+                  ],
+                  "strokes": [],
+                  "strokeWeight": 0,
+                  "strokeAlign": "INSIDE",
+                  "effects": [],
+                  "cornerRadius": 0,
+                  "stackChildAlignSelf": "STRETCH",
+                  "characters": "EMAIL",
+                  "style": {
+                    "fontFamily": "Inter",
+                    "fontPostScriptName": null,
+                    "fontSize": 13,
+                    "fontWeight": 400,
+                    "italic": false,
+                    "lineHeightPx": 15.600000381469727,
+                    "lineHeightUnit": "PIXELS",
+                    "letterSpacing": 0,
+                    "textAlignHorizontal": "LEFT",
+                    "textAlignVertical": "TOP",
+                    "textDecoration": "NONE",
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 0.5
+                      }
+                    ]
+                  },
+                  "singleLine": true
+                },
+                {
+                  "type": "FRAME",
+                  "name": "div",
+                  "x": 0,
+                  "y": 23,
+                  "width": 345,
+                  "height": 48.5,
+                  "opacity": 1,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      },
+                      "opacity": 0.05999999865889549
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.4000000059604645,
+                        "g": 0.4941176474094391,
+                        "b": 0.9176470637321472
+                      },
+                      "opacity": 0.6000000238418579
+                    }
+                  ],
+                  "strokeWeight": 1,
+                  "strokeAlign": "INSIDE",
+                  "effects": [],
+                  "cornerRadius": 12,
+                  "clipsContent": false,
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 16,
+                  "paddingRight": 16,
+                  "paddingTop": 14,
+                  "paddingBottom": 14,
+                  "primaryAxisAlignItems": "MIN",
+                  "counterAxisAlignItems": "MIN",
+                  "stackChildAlignSelf": "STRETCH",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

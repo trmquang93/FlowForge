@@ -10,7 +10,7 @@ const NOTE_COLORS = {
 
 const COLOR_OPTIONS = ["yellow", "blue", "red", "green"];
 
-export function StickyNote({ note, zoom, onUpdate, onDelete, onDragStart, isMultiSelected, onToggleSelect, onMultiDragStart, selected, onSelect }) {
+export function StickyNote({ note, zoom, onUpdate, onDelete, onDragStart, isMultiSelected, onToggleSelect, onMultiDragStart, selected, onSelect, mcpFlash }) {
   const [isEditing, setIsEditing] = useState(!note.content);
   const [showMenu, setShowMenu] = useState(false);
   const textareaRef = useRef(null);
@@ -57,6 +57,7 @@ export function StickyNote({ note, zoom, onUpdate, onDelete, onDragStart, isMult
         cursor: "grab",
         userSelect: "none",
         zIndex: 5,
+        animation: mcpFlash ? "mcp-flash 0.8s ease-out" : undefined,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",

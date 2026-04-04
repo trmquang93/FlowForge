@@ -1,11 +1,11 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { FlowState } from "./src/state.js";
-import { HtmlRenderer } from "./src/renderer/html-renderer.js";
+import { SatoriRenderer } from "./src/renderer/satori-renderer.js";
 import { createServer } from "./src/server.js";
 
 async function main() {
   const state = new FlowState();
-  const renderer = new HtmlRenderer();
+  const renderer = new SatoriRenderer();
 
   // Auto-open a file if --file argument is provided
   const fileArgIdx = process.argv.indexOf("--file");
@@ -19,13 +19,13 @@ async function main() {
     }
   }
 
-  // Initialize Puppeteer renderer
+  // Initialize Satori renderer
   try {
     await renderer.init();
-    process.stderr.write("HTML renderer ready (Chrome connected)\n");
+    process.stderr.write("Satori renderer ready\n");
   } catch (err) {
-    process.stderr.write(`Warning: HTML renderer unavailable: ${err.message}\n`);
-    process.stderr.write("Screen creation from HTML will not work. Set CHROME_PATH if needed.\n");
+    process.stderr.write(`Warning: Satori renderer unavailable: ${err.message}\n`);
+    process.stderr.write("Screen creation from HTML will not work.\n");
   }
 
   const server = createServer(state, renderer);
@@ -33,13 +33,11 @@ async function main() {
 
   // Graceful shutdown
   process.on("SIGINT", async () => {
-    await renderer.close();
     await server.close();
     process.exit(0);
   });
 
   process.on("SIGTERM", async () => {
-    await renderer.close();
     await server.close();
     process.exit(0);
   });

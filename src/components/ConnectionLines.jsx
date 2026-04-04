@@ -100,6 +100,7 @@ export function ConnectionLines({
   onConnectionDoubleClick,
   onEndpointMouseDown,
   endpointDragPreview,
+  mcpFlashIds,
 }) {
   return (
     <svg
@@ -222,6 +223,16 @@ export function ConnectionLines({
 
         return (
           <g key={conn.id}>
+            {/* MCP flash overlay — fades in/out when this connection was changed by MCP */}
+            {mcpFlashIds?.has(conn.id) && (
+              <path
+                d={d}
+                fill="none"
+                stroke="#61afef"
+                strokeWidth={6}
+                style={{ animation: "mcp-flash-svg 0.8s ease-out", pointerEvents: "none" }}
+              />
+            )}
             {/* Transparent wide hit area for click interaction */}
             <path
               d={d}

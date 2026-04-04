@@ -3,7 +3,17 @@
   "private": true,
   "version": "1.0.0",
   "description": "Browser-native visual app flow designer that generates AI build instructions",
-  "keywords": ["app-flow", "navigation-designer", "ai-instructions", "wireframe", "prototyping", "mobile-app", "swiftui", "flutter", "react-native"],
+  "keywords": [
+    "app-flow",
+    "navigation-designer",
+    "ai-instructions",
+    "wireframe",
+    "prototyping",
+    "mobile-app",
+    "swiftui",
+    "flutter",
+    "react-native"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +26,7 @@
   "dependencies": {
     "@grida/refig": "^0.0.4",
     "@supabase/supabase-js": "^2.99.2",
+    "kiwi-schema": "^0.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -31,6 +42,7 @@
     "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
+    "fig-kiwi": "^0.0.1",
     "jsdom": "^28.1.0",
     "vite": "^6.2.0",
     "vitest": "^4.0.18"

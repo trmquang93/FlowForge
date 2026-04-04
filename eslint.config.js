@@ -26,6 +26,7 @@ const browserGlobals = {
   TextEncoder: "readonly",
   TextDecoder: "readonly",
   crypto: "readonly",
+  ClipboardItem: "readonly",
   KeyboardEvent: "readonly",
   MouseEvent: "readonly",
   CustomEvent: "readonly",
