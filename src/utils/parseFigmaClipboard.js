@@ -3,6 +3,7 @@ import { FigmaDocument, FigmaRenderer } from "@grida/refig/browser";
 // iofigma is exported from the chunk but not re-exported from @grida/refig/browser.
 // Pin the dependency version to keep this import stable.
 import { iofigma } from "@grida/refig/dist/chunk-INJ5F2RK.mjs";
+import { figmaNodeToHtml, renderHtmlToImage } from "./figmaToHtml";
 
 // ---------------------------------------------------------------------------
 // Shared-component capture: monkey-patch factory.node to intercept
@@ -12,6 +13,25 @@ import { iofigma } from "@grida/refig/dist/chunk-INJ5F2RK.mjs";
 const origFactoryNode = iofigma.kiwi.factory.node;
 let captureState = null;
 
+// Auto-layout property names that exist on raw kiwi nodeChanges but are
+// dropped by the factory's REST-API conversion. We copy them onto the
+// factory output so figmaToHtml.js can read them directly.
+const KIWI_LAYOUT_PROPS = [
+  "stackMode",
+  "stackSpacing",
+  "stackHorizontalPadding",
+  "stackVerticalPadding",
+  "stackPaddingRight",
+  "stackPaddingBottom",
+  "stackPrimaryAlignItems",
+  "stackCounterAlignItems",
+  "stackChildAlignSelf",
+  "stackChildPrimaryGrow",
+  "stackPositioning",
+  "stackCounterSizing",
+  "stackPrimarySizing",
+];
+
 iofigma.kiwi.factory.node = function (nc, message) {
   if (captureState) {
     captureState.message = message;
@@ -19,7 +39,19 @@ iofigma.kiwi.factory.node = function (nc, message) {
       captureState.derived.set(iofigma.kiwi.guid(nc.guid), nc);
     }
   }
-  return origFactoryNode.call(this, nc, message);
+  const node = origFactoryNode.call(this, nc, message);
+
+  // Augment with auto-layout properties from the raw kiwi nodeChange.
+  // The factory converts to REST API format but drops all layout props.
+  if (node) {
+    for (const prop of KIWI_LAYOUT_PROPS) {
+      if (nc[prop] != null) {
+        node[prop] = nc[prop];
+      }
+    }
+  }
+
+  return node;
 };
 
 function beginCapture() {
@@ -331,4 +363,67 @@ export async function renderFigmaBuffer(buffer) {
   });
 
   return { frameName: firstFrame.name, imageDataUrl, frameCount: frames.length };
+}
+
+// ---------------------------------------------------------------------------
+// HTML-based rendering: convert Figma node tree → HTML → PNG.
+// This bypasses the WASM renderer entirely, producing higher-fidelity output
+// by leveraging the browser's own layout and text rendering.
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert a parsed Figma frame to an HTML document string.
+ *
+ * @param {FigmaDocument} doc - parsed Figma document (from parseFigmaFrames)
+ * @param {string} frameId - the frame node ID to convert
+ * @returns {{ html: string, frameName: string, width: number, height: number } | null}
+ */
+export function figmaFrameToHtml(doc, frameId) {
+  const node = findNodeInFigFile(doc._figFile, frameId);
+  if (!node) return null;
+
+  const width = node.size?.x ?? 393;
+  const height = node.size?.y ?? 852;
+  const html = figmaNodeToHtml(node, { width, height });
+
+  return {
+    html,
+    frameName: node.name || "Figma Frame",
+    width,
+    height,
+  };
+}
+
+/**
+ * High-level entry point: parse a Figma clipboard buffer, convert each frame
+ * to HTML, and render to PNG using the browser's own rendering engine.
+ *
+ * @param {Uint8Array} buffer - decoded fig-kiwi binary from clipboard
+ * @returns {Promise<Array<{ frameName: string, imageDataUrl: string, html: string, width: number, height: number }>>}
+ */
+export async function convertFigmaBuffer(buffer) {
+  const { frames, document: doc } = parseFigmaFrames(buffer);
+  if (frames.length === 0) throw new Error("No frames found in Figma clipboard data");
+
+  const results = [];
+  for (const frame of frames) {
+    const converted = figmaFrameToHtml(doc, frame.id);
+    if (!converted) continue;
+
+    const imageDataUrl = await renderHtmlToImage(
+      converted.html,
+      Math.ceil(converted.width),
+      Math.ceil(converted.height),
+    );
+
+    results.push({
+      frameName: converted.frameName,
+      imageDataUrl,
+      html: converted.html,
+      width: converted.width,
+      height: converted.height,
+    });
+  }
+
+  return results;
 }
