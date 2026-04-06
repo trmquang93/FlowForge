@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPayload } from "./buildPayload.js";
+import { buildPayload, buildCollabPayload } from "./buildPayload.js";
 
 describe("buildPayload", () => {
   const screens = [{ id: "s1" }, { id: "s2" }];
@@ -50,5 +50,37 @@ describe("buildPayload", () => {
     expect(payload.metadata.exportedAt).toBeDefined();
     expect(payload.metadata.exportedAt >= before).toBe(true);
     expect(payload.metadata.exportedAt <= after).toBe(true);
+  });
+
+  it("passes comments array through to the payload", () => {
+    const comments = [{ id: "c1" }, { id: "c2" }];
+    const payload = buildPayload([], [], { x: 0, y: 0 }, 1, [], "", "", {}, [], [], [], comments);
+    expect(payload.comments).toBe(comments);
+  });
+
+  it("defaults comments to empty array when not provided", () => {
+    const payload = buildPayload([], [], { x: 0, y: 0 }, 1);
+    expect(payload.comments).toEqual([]);
+  });
+});
+
+describe("buildCollabPayload", () => {
+  it("includes the comments array in the output", () => {
+    const comments = [{ id: "c1" }];
+    const payload = buildCollabPayload([], [], [], "", "", {}, [], [], [], comments);
+    expect(payload.comments).toBe(comments);
+  });
+
+  it("defaults comments to empty array when not provided", () => {
+    const payload = buildCollabPayload([], []);
+    expect(payload.comments).toEqual([]);
+  });
+
+  it("includes all expected top-level keys", () => {
+    const payload = buildCollabPayload([], []);
+    const keys = ["screens", "connections", "documents", "featureBrief", "taskLink", "techStack", "dataModels", "stickyNotes", "screenGroups", "comments"];
+    for (const key of keys) {
+      expect(payload).toHaveProperty(key);
+    }
   });
 });

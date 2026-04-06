@@ -242,6 +242,19 @@ describe("importFlow", () => {
     expect(result.screenGroups).toEqual([]);
   });
 
+  it("backfills comments to [] when absent from the file", () => {
+    const file = makeValidFile(); // no comments field
+    const result = importFlow(file);
+    expect(result.comments).toEqual([]);
+  });
+
+  it("preserves existing comments array when present in the file", () => {
+    const existingComments = [{ id: "c1", text: "hi", resolved: false }];
+    const file = makeValidFile({ comments: existingComments });
+    const result = importFlow(file);
+    expect(result.comments).toEqual(existingComments);
+  });
+
   // --- Valid file parsing ---
 
   it("parses valid v6 file without errors", () => {
