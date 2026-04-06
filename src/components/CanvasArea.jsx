@@ -62,9 +62,16 @@ export function CanvasArea({
   onTemplates,
   // MCP flash
   mcpFlashIds,
+  // Comments
+  comments, canComment, onCommentImageClick, onCommentConnectionClick,
 }) {
   return (
+    <>
+    {activeTool === "comment" && (
+      <style>{`[data-canvas-area] * { cursor: inherit !important; }`}</style>
+    )}
     <div
+      data-canvas-area
       ref={canvasRef}
       onMouseDown={(e) => {
         if (connectionTypePrompt) { onConnectionTypeNavigate(); return; }
@@ -196,6 +203,12 @@ export function CanvasArea({
             isReadOnly={isReadOnly}
             onFormSummary={onFormSummary}
             mcpFlash={mcpFlashIds?.has(screen.id)}
+            commentPins={(comments || []).filter(
+              (c) => c.screenId === screen.id && c.targetType === "screen" && !c.resolved
+            )}
+            onCommentImageClick={onCommentImageClick}
+            selectedCommentId={null}
+            onCommentPinClick={null}
           />
         ))}
         {stickyNotes.map((note) => (
@@ -564,6 +577,7 @@ export function CanvasArea({
         onUpload={handleImageUpload}
         onAddBlank={() => addScreenAtCenter()}
         isReadOnly={isReadOnly}
+        canComment={canComment}
         onAddStickyNote={() => {
           if (!canvasRef.current) return;
           const rect = canvasRef.current.getBoundingClientRect();
@@ -575,5 +589,6 @@ export function CanvasArea({
         onAddWireframe={onAddWireframe}
       />
     </div>
+    </>
   );
 }
