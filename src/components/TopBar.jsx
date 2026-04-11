@@ -102,7 +102,7 @@ function ShareIcon() {
   );
 }
 
-export function TopBar({ screenCount, connectionCount, onExport, onImport, onGenerate, canUndo, canRedo, onUndo, onRedo, connectedFileName, saveStatus, isFileSystemSupported, onNew, onOpen, onSaveAs, onDocuments, documentCount = 0, onDataModels, dataModelCount = 0, collabState, onShare, collabBadge, collabPresence, onToggleParticipants, showParticipants, onTemplates, onToggleComments, showComments, unresolvedCommentCount = 0, canComment }) {
+export function TopBar({ screenCount, connectionCount, onExport, onExportPrototype, onImport, onGenerate, canUndo, canRedo, onUndo, onRedo, connectedFileName, saveStatus, isFileSystemSupported, onNew, onOpen, onSaveAs, onDocuments, documentCount = 0, onDataModels, dataModelCount = 0, collabState, onShare, collabBadge, collabPresence, onToggleParticipants, showParticipants, onTemplates, onCompareFlows, onToggleComments, showComments, unresolvedCommentCount = 0, canComment }) {
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const fileMenuRef = useRef(null);
 
@@ -430,6 +430,28 @@ export function TopBar({ screenCount, connectionCount, onExport, onImport, onGen
               >
                 <span>Export</span>
               </button>
+
+              <button
+                className="ff-menu-item"
+                onClick={() => { if (screenCount > 0) { setFileMenuOpen(false); onExportPrototype(); } }}
+                disabled={screenCount === 0}
+                style={menuItemStyle(screenCount === 0)}
+              >
+                <span>Export Prototype</span>
+              </button>
+
+              {isFileSystemSupported && (
+                <>
+                  <div style={{ height: 1, background: COLORS.border, margin: "6px 0" }} />
+                  <button
+                    className="ff-menu-item"
+                    onClick={() => { setFileMenuOpen(false); onCompareFlows(); }}
+                    style={menuItemStyle(false)}
+                  >
+                    <span>Compare Flows</span>
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

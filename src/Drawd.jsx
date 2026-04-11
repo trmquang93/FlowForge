@@ -34,6 +34,8 @@ import { CollabPresence } from "./components/CollabPresence";
 import { CollabBadge } from "./components/CollabBadge";
 import { importFlow } from "./utils/importFlow";
 import { detectDrawdFile, findDrawdItem } from "./utils/detectDrawdFile";
+import { diffFlows } from "./utils/diffFlows";
+import { buildPayload } from "./utils/buildPayload";
 
 
 export default function Drawd({ initialRoomCode }) {
@@ -198,6 +200,7 @@ export default function Drawd({ initialRoomCode }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [formSummaryScreen, setFormSummaryScreen] = useState(null);
   const [showTemplateBrowser, setShowTemplateBrowser] = useState(false);
+  const [flowDiffResult, setFlowDiffResult] = useState(null);
 
   // ── Template inserter ─────────────────────────────────────────────────
   const { insertTemplate } = useTemplateInserter({
@@ -209,6 +212,33 @@ export default function Drawd({ initialRoomCode }) {
     insertTemplate(data);
     setShowTemplateBrowser(false);
   }, [insertTemplate]);
+
+  // ── Flow comparison ───────────────────────────────────────────────────
+  const onCompareFlows = useCallback(async () => {
+    if (!isFileSystemSupported) return;
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        types: [{
+          description: "Drawd files",
+          accept: { "application/json": [".drawd", ".drawd.json"] },
+        }],
+        multiple: false,
+      });
+      const file = await handle.getFile();
+      const text = await file.text();
+      const baseFlow = importFlow(text);
+      const currentFlow = buildPayload(
+        screens, connections, pan, zoom, documents,
+        featureBrief, taskLink, techStack,
+        dataModels, stickyNotes, screenGroups, comments,
+      );
+      const diff = diffFlows(baseFlow, currentFlow);
+      setFlowDiffResult({ diff, fileName: file.name });
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      console.error("Compare failed:", err);
+    }
+  }, [isFileSystemSupported, screens, connections, pan, zoom, documents, featureBrief, taskLink, techStack, dataModels, stickyNotes, screenGroups, comments]);
 
   // ── Instruction generation ─────────────────────────────────────────────
   const { instructions, showInstructions, setShowInstructions, onGenerate, buildInstructionResult } =
@@ -310,8 +340,8 @@ export default function Drawd({ initialRoomCode }) {
     });
 
   // ── Import / export ────────────────────────────────────────────────────────────────
-  const { importConfirm, setImportConfirm, importFileRef, onExport, onImport, onImportFileChange, onImportReplace, onImportMerge } =
-    useImportExport({ screens, connections, documents, dataModels, stickyNotes, screenGroups, comments, pan, zoom, featureBrief, taskLink, techStack, replaceAll, mergeAll, setPan, setZoom, setStickyNotes, setScreenGroups, setComments });
+  const { importConfirm, setImportConfirm, importFileRef, onExport, onExportPrototype, onImport, onImportFileChange, onImportReplace, onImportMerge } =
+    useImportExport({ screens, connections, documents, dataModels, stickyNotes, screenGroups, comments, pan, zoom, featureBrief, taskLink, techStack, replaceAll, mergeAll, setPan, setZoom, setStickyNotes, setScreenGroups, setComments, scopeScreenIds, connectedFileName });
 
   // ── Toast notification ─────────────────────────────────────────────────────────────
   const [toast, setToast] = useState(null);
@@ -460,6 +490,7 @@ export default function Drawd({ initialRoomCode }) {
         documentCount={documents.length}
         dataModelCount={dataModels.length}
         onExport={onExport}
+        onExportPrototype={onExportPrototype}
         onImport={onImport}
         onGenerate={onGenerate}
         onDocuments={() => setShowDocuments(true)}
@@ -494,6 +525,7 @@ export default function Drawd({ initialRoomCode }) {
         onToggleParticipants={() => setShowParticipants((v) => !v)}
         showParticipants={showParticipants}
         onTemplates={onTemplates}
+        onCompareFlows={onCompareFlows}
         canComment={canComment}
         showComments={showComments}
         onToggleComments={() => setShowComments((v) => !v)}
@@ -733,6 +765,8 @@ export default function Drawd({ initialRoomCode }) {
         showTemplateBrowser={showTemplateBrowser}
         setShowTemplateBrowser={setShowTemplateBrowser}
         onInsertTemplate={onInsertTemplate}
+        flowDiffResult={flowDiffResult}
+        setFlowDiffResult={setFlowDiffResult}
         showComments={showComments}
         setShowComments={setShowComments}
         comments={comments}

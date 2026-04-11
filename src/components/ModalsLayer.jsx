@@ -14,6 +14,7 @@ import { FormSummaryPanel } from "./FormSummaryPanel";
 import { TemplateBrowserModal } from "./TemplateBrowserModal";
 import { CommentsPanel } from "./CommentsPanel";
 import { CommentComposer } from "./CommentComposer";
+import { FlowDiffModal } from "./FlowDiffModal";
 
 export function ModalsLayer({
   // Hotspot modal
@@ -48,6 +49,8 @@ export function ModalsLayer({
   formSummaryScreen, setFormSummaryScreen,
   // Template browser
   showTemplateBrowser, setShowTemplateBrowser, onInsertTemplate,
+  // Flow diff
+  flowDiffResult, setFlowDiffResult,
   // Comments
   showComments, setShowComments,
   comments, connections,
@@ -263,6 +266,14 @@ export function ModalsLayer({
           clientY={commentComposer.clientY}
           onSubmit={onCommentSubmit}
           onCancel={() => setCommentComposer(null)}
+        />
+      )}
+
+      {flowDiffResult && (
+        <FlowDiffModal
+          diffResult={flowDiffResult.diff}
+          baseFileName={flowDiffResult.fileName}
+          onClose={() => setFlowDiffResult(null)}
         />
       )}
     </>
