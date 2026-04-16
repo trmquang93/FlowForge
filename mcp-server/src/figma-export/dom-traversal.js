@@ -509,8 +509,8 @@ export function domTraversalFn(viewportWidth, viewportHeight) {
     type: 'FRAME',
     name: 'Converted Screen',
     x: 0, y: 0,
-    width: viewportWidth,
-    height: viewportHeight,
+    width: Math.max(viewportWidth || 0, 100),
+    height: Math.max(viewportHeight || 0, 100),
     opacity: 1,
     fills: bodyBg
       ? [{ type: 'SOLID', color: toFigmaColor(bodyBg), opacity: bodyBg.a }]
